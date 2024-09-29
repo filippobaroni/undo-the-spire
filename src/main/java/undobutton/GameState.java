@@ -1,12 +1,17 @@
 package undobutton;
 
 import basemod.ReflectionHacks;
+import com.badlogic.gdx.graphics.Color;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
+import com.megacrit.cardcrawl.core.AbstractCreature;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import com.megacrit.cardcrawl.potions.AbstractPotion;
 import com.megacrit.cardcrawl.ui.panels.PotionPopUp;
 import savestate.SaveState;
+
+import java.util.Arrays;
 
 public class GameState {
     private final SaveState saveState;
@@ -29,7 +34,32 @@ public class GameState {
         ReflectionHacks.setPrivate(AbstractDungeon.topPanel.potionUi, PotionPopUp.class, "hoveredMonster", null);
         // Load saveState
         saveState.loadState();
+        // Reset glowing of end turn button
         AbstractDungeon.overlayMenu.endTurnButton.isGlowing = !AbstractDungeon.player.hand.canUseAnyCard();
+        // Avoid monster animations
+        for (AbstractMonster m : AbstractDungeon.getCurrRoom().monsters.monsters) {
+            if (m.isDying) {
+                m.isDead = true;
+            }
+            // No health bar pulse
+            m.hbAlpha = 1.0F;
+            ReflectionHacks.setPrivate(m, AbstractCreature.class, "hbYOffset", 0.0F);
+            ReflectionHacks.setPrivate(m, AbstractCreature.class, "hbShowTimer", 0.0F);
+            if (m.isDead) {
+                for (String field : Arrays.asList("hbShadowColor", "hbBgColor", "hbTextColor", "blockOutlineColor")) {
+                    ((Color) ReflectionHacks.getPrivate(m, AbstractCreature.class, field)).a = 0.0F;
+                }
+                ReflectionHacks.setPrivate(m, AbstractCreature.class, "healthBarAnimTimer", 0.0F);
+            }
+            // No intent pulse
+            m.intentAlpha = m.intentAlphaTarget;
+            // No block pulse
+            ReflectionHacks.setPrivate(m, AbstractCreature.class, "blockAnimTimer", 0.0F);
+            ReflectionHacks.setPrivate(m, AbstractCreature.class, "blockOffset", 0.0F);
+            ReflectionHacks.setPrivate(m, AbstractCreature.class, "blockScale", 1.0F);
+            ((Color) ReflectionHacks.getPrivate(m, AbstractCreature.class, "blockTextColor")).a = 1.0F;
+            ReflectionHacks.setPrivate(m, AbstractCreature.class, "blockTextColor", new Color(0.9F, 0.9F, 0.9F, 1.0F));
+        }
     }
 
     public enum ActionType {
