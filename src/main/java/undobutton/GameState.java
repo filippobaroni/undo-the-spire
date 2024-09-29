@@ -57,8 +57,15 @@ public class GameState {
             ReflectionHacks.setPrivate(m, AbstractCreature.class, "blockAnimTimer", 0.0F);
             ReflectionHacks.setPrivate(m, AbstractCreature.class, "blockOffset", 0.0F);
             ReflectionHacks.setPrivate(m, AbstractCreature.class, "blockScale", 1.0F);
-            ((Color) ReflectionHacks.getPrivate(m, AbstractCreature.class, "blockTextColor")).a = 1.0F;
+            ((Color) ReflectionHacks.getPrivate(m, AbstractCreature.class, "blockColor")).a = 1.0F;
             ReflectionHacks.setPrivate(m, AbstractCreature.class, "blockTextColor", new Color(0.9F, 0.9F, 0.9F, 1.0F));
+        }
+        // Avoid hand animations
+        for (AbstractCard c : AbstractDungeon.player.hand.group) {
+            c.angle = c.targetAngle;
+            c.current_x = c.target_x;
+            c.current_y = c.target_y;
+            c.drawScale = c.targetDrawScale;
         }
     }
 

@@ -8,6 +8,9 @@ import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import savestate.PlayerState;
 
+
+// Patch PlayerState.loadPlayer to set EnergyPanel.totalCount instead of calling setEnergy.
+// This prevents the (in my opinion) excessive flashing animation of the energy panel.
 @SpirePatch(clz = PlayerState.class, method = "loadPlayer")
 public class PlayerStatePatch {
     @SpireInstrumentPatch
