@@ -9,7 +9,7 @@ import com.megacrit.cardcrawl.ui.panels.PotionPopUp;
 import savestate.SaveState;
 
 public class GameState {
-    private SaveState saveState;
+    private final SaveState saveState;
     public Action lastAction;
 
     public GameState(Action action) {
@@ -31,7 +31,7 @@ public class GameState {
         saveState.loadState();
     }
 
-    public static enum ActionType {
+    public enum ActionType {
         CARD_PLAYED,
         POTION_USED,
         TURN_ENDED

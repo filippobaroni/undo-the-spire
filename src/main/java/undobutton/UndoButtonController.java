@@ -1,15 +1,12 @@
 package undobutton;
 
-import java.util.ArrayDeque;
-
 import basemod.DevConsole;
-import basemod.ReflectionHacks;
 import com.megacrit.cardcrawl.actions.GameActionManager;
-import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
-import com.megacrit.cardcrawl.ui.panels.PotionPopUp;
 import org.apache.logging.log4j.Logger;
+
+import java.util.ArrayDeque;
 
 public class UndoButtonController {
     private final Logger logger;

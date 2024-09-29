@@ -3,7 +3,6 @@ package undobutton;
 import basemod.ClickableUIElement;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.megacrit.cardcrawl.actions.GameActionManager;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
@@ -17,7 +16,7 @@ import undobutton.util.TextureLoader;
 import static undobutton.UndoButtonMod.imagePath;
 
 public class UndoButtonUI {
-    private static float ENERGY_X = 198F, ENERGY_Y = 190F, ENERGY_Y_OFFSET = 128F, HORIZONTAL_SPACING = 10F, TOOLTIP_OFFSET = 120F;
+    private static final float ENERGY_X = 198F, ENERGY_Y = 190F, ENERGY_Y_OFFSET = 128F, HORIZONTAL_SPACING = 10F, TOOLTIP_OFFSET = 120F;
     private Texture undoButtonTexture, redoButtonTexture;
     private UndoButton undoButton;
     private RedoButton redoButton;
