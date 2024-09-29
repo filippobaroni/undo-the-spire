@@ -13,7 +13,7 @@ import undobutton.util.TextureLoader;
 import static undobutton.UndoButtonMod.imagePath;
 
 public class UndoButtonUI {
-    private static final float ENERGY_X = 198F, ENERGY_Y = 190F, ENERGY_Y_OFFSET = 100F, HORIZONTAL_SPACING = 20F;
+    private static final float ENERGY_X = 198F, ENERGY_Y = 190F, ENERGY_Y_OFFSET = 128F, HORIZONTAL_SPACING = 10F;
     private Texture undoButtonTexture, redoButtonTexture;
     private UndoButton undoButton;
     private RedoButton redoButton;
