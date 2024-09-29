@@ -29,6 +29,7 @@ public class GameState {
         ReflectionHacks.setPrivate(AbstractDungeon.topPanel.potionUi, PotionPopUp.class, "hoveredMonster", null);
         // Load saveState
         saveState.loadState();
+        AbstractDungeon.overlayMenu.endTurnButton.isGlowing = !AbstractDungeon.player.hand.canUseAnyCard();
     }
 
     public enum ActionType {
