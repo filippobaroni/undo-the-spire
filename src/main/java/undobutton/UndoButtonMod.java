@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.megacrit.cardcrawl.actions.GameActionManager;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import com.megacrit.cardcrawl.helpers.input.InputAction;
 import com.megacrit.cardcrawl.potions.AbstractPotion;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import undobutton.util.GeneralUtils;
@@ -46,6 +47,7 @@ public class UndoButtonMod implements
     public static final Logger logger = LogManager.getLogger(modID); //Used to output to the console.
     public static UndoButtonController controller;
     public static UndoButtonUI ui;
+    public static InputAction undoInputAction, redoInputAction;
 
 
     //This is used to prefix the IDs of various objects like cards and relics,
@@ -80,6 +82,10 @@ public class UndoButtonMod implements
 
         // Initialise the UI
         ui.initialize();
+
+        // Set up the undo and redo input actions
+        undoInputAction = new InputAction(Input.Keys.U);
+        redoInputAction = new InputAction(Input.Keys.R);
     }
 
     @Override
@@ -95,22 +101,12 @@ public class UndoButtonMod implements
     @Override
     public void receivePostUpdate() {
         ui.update();
-        if(AbstractDungeon.getCurrMapNode() == null) {
+        if(!controller.isSafeToUndo()) {
             return;
         }
-        AbstractRoom room = AbstractDungeon.getCurrRoom();
-        if (room == null || room.phase != AbstractRoom.RoomPhase.COMBAT) {
-            return;
-        }
-        if (AbstractDungeon.isScreenUp || AbstractDungeon.actionManager.phase != GameActionManager.Phase.WAITING_ON_USER) {
-            return;
-        }
-        if (DevConsole.visible) {
-            return;
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.U)) {
+        if (undoInputAction.isJustPressed()) {
             controller.undo();
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
+        } else if (redoInputAction.isJustPressed()) {
             controller.redo();
         }
     }
@@ -120,7 +116,7 @@ public class UndoButtonMod implements
         if (card.isInAutoplay) {
             return;
         }
-        controller.addState();
+        controller.addState(new GameState.Action(GameState.ActionType.CARD_PLAYED, card));
         logger.info("Added new state before playing card {}", card.name);
     }
 
@@ -133,7 +129,7 @@ public class UndoButtonMod implements
         if (room == null || room.phase != AbstractRoom.RoomPhase.COMBAT) {
             return;
         }
-        controller.addState();
+        controller.addState(new GameState.Action(GameState.ActionType.POTION_USED, potion));
         logger.info("Added new state before using potion {}", potion.name);
     }
 
@@ -170,6 +166,8 @@ public class UndoButtonMod implements
         //Feel free to comment out/delete any that you don't end up using.
         BaseMod.loadCustomStringsFile(UIStrings.class,
                 localizationPath(lang, "UIStrings.json"));
+        BaseMod.loadCustomStringsFile(TutorialStrings.class,
+                localizationPath(lang, "TutorialStrings.json"));
     }
 
     //These methods are used to generate the correct filepaths to various parts of the resources folder.

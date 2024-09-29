@@ -2,18 +2,20 @@ package undobutton;
 
 import java.util.ArrayDeque;
 
+import basemod.DevConsole;
 import basemod.ReflectionHacks;
+import com.megacrit.cardcrawl.actions.GameActionManager;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import com.megacrit.cardcrawl.ui.panels.PotionPopUp;
 import org.apache.logging.log4j.Logger;
-import savestate.SaveState;
 
 public class UndoButtonController {
     private final Logger logger;
     public static int MAX_UNDO = 0;
-    private final ArrayDeque<SaveState> pastGameStates = new ArrayDeque<>();
-    private final ArrayDeque<SaveState> futureGameStates = new ArrayDeque<>();
+    private final ArrayDeque<GameState> pastGameStates = new ArrayDeque<>();
+    private final ArrayDeque<GameState> futureGameStates = new ArrayDeque<>();
 
     public UndoButtonController(Logger logger) {
         this.logger = logger;
@@ -23,15 +25,32 @@ public class UndoButtonController {
         return !pastGameStates.isEmpty();
     }
 
+    public boolean isSafeToUndo() {
+        if(AbstractDungeon.getCurrMapNode() == null) {
+            return false;
+        }
+        AbstractRoom room = AbstractDungeon.getCurrRoom();
+        if (room == null || room.phase != AbstractRoom.RoomPhase.COMBAT) {
+            return false;
+        }
+        if (AbstractDungeon.isScreenUp || !AbstractDungeon.actionManager.isEmpty() || AbstractDungeon.actionManager.phase != GameActionManager.Phase.WAITING_ON_USER) {
+            return false;
+        }
+        if (DevConsole.visible) {
+            return false;
+        }
+        return true;
+    }
+
     public boolean canRedo() {
         return !futureGameStates.isEmpty();
     }
 
-    public void addState() {
+    public void addState(GameState.Action action) {
         // Clear future states
         futureGameStates.clear();
         // Add new state
-        pastGameStates.addFirst(makeState());
+        pastGameStates.addFirst(new GameState(action));
         // Remove the oldest state if queue is too long
         if (pastGameStates.size() > MAX_UNDO) {
             pastGameStates.removeLast();
@@ -45,8 +64,9 @@ public class UndoButtonController {
             return;
         }
         logger.info("Undoing.");
-        futureGameStates.addFirst(makeState());
-        applyState(pastGameStates.removeFirst());
+        GameState state = pastGameStates.removeFirst();
+        futureGameStates.addFirst(new GameState(state.lastAction));
+        state.apply();
     }
 
     public void redo() {
@@ -55,29 +75,9 @@ public class UndoButtonController {
             return;
         }
         logger.info("Redoing.");
-        pastGameStates.addFirst(makeState());
-        applyState(futureGameStates.removeFirst());
-    }
-
-    private SaveState makeState() {
-        SaveState state = new SaveState();
-        // Purge end turn traces from newState
-        ReflectionHacks.setPrivate(state, SaveState.class, "endTurnQueued", false);
-        ReflectionHacks.setPrivate(state, SaveState.class, "isEndingTurn", false);
-        // Return
-        return state;
-    }
-
-    private void applyState(SaveState state) {
-        // Release selected/hovered card
-        AbstractDungeon.player.releaseCard();
-        ReflectionHacks.setPrivate(AbstractDungeon.player, AbstractPlayer.class, "hoveredMonster", null);
-        // Release potion
-        AbstractDungeon.topPanel.potionUi.close();
-        AbstractDungeon.topPanel.potionUi.targetMode = false;
-        ReflectionHacks.setPrivate(AbstractDungeon.topPanel.potionUi, PotionPopUp.class, "hoveredMonster", null);
-        // Load state
-        state.loadState();
+        GameState state= futureGameStates.removeFirst();
+        pastGameStates.addFirst(new GameState(state.lastAction));
+        state.apply();
     }
 
     public void clearStates() {
@@ -85,4 +85,18 @@ public class UndoButtonController {
         futureGameStates.clear();
         logger.info("Cleared undo/redo queue.");
     }
+
+    public String getUndoActionString() {
+        if (pastGameStates.isEmpty()) {
+            return "";
+        }
+        return pastGameStates.getFirst().lastAction.toString();
+    }
+    public String getRedoActionString() {
+        if (futureGameStates.isEmpty()) {
+            return "";
+        }
+        return futureGameStates.getFirst().lastAction.toString();
+    }
+
 }

@@ -1,0 +1,14 @@
+{
+  "${modID}:Undo Tip": {
+    "LABEL": ["Undo"],
+    "TEXT": [
+      "Undo your last action"
+    ]
+  },
+  "${modID}:Redo Tip": {
+    "LABEL": ["Redo"],
+    "TEXT": [
+      "Redo your last undone action"
+    ]
+  }
+}

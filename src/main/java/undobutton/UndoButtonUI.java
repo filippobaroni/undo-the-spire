@@ -4,16 +4,20 @@ import basemod.ClickableUIElement;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.megacrit.cardcrawl.actions.GameActionManager;
+import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import com.megacrit.cardcrawl.helpers.TipHelper;
+import com.megacrit.cardcrawl.helpers.input.InputAction;
 import com.megacrit.cardcrawl.helpers.input.InputHelper;
+import com.megacrit.cardcrawl.localization.TutorialStrings;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import undobutton.util.TextureLoader;
 
 import static undobutton.UndoButtonMod.imagePath;
 
 public class UndoButtonUI {
-    private static final float ENERGY_X = 198F, ENERGY_Y = 190F, ENERGY_Y_OFFSET = 128F, HORIZONTAL_SPACING = 10F;
+    private static float ENERGY_X = 198F, ENERGY_Y = 190F, ENERGY_Y_OFFSET = 128F, HORIZONTAL_SPACING = 10F, TOOLTIP_OFFSET = 120F;
     private Texture undoButtonTexture, redoButtonTexture;
     private UndoButton undoButton;
     private RedoButton redoButton;
@@ -45,10 +49,29 @@ public class UndoButtonUI {
 
     abstract static class UndoOrRedoButton extends ClickableUIElement {
         protected boolean isHidden;
+        protected float width, height;
+        protected TutorialStrings tutorialStrings;
 
         public UndoOrRedoButton(Texture texture, float x, float y) {
             super(texture, x, y, texture.getWidth(), texture.getHeight());
+            width = texture.getWidth()* Settings.scale;
+            height = texture.getHeight() * Settings.scale;
+            setX(this.x - width / 2);
+            setY(this.y - height / 2);
             hide();
+        }
+
+        @Override
+        public void render(SpriteBatch sb) {
+            if (!isHidden) {
+                if (hitbox.hovered) {
+                    TipHelper.renderGenericTip(x,
+                            y + height + TOOLTIP_OFFSET,
+                            String.format("%s (%s)", tutorialStrings.LABEL[0], getInputAction().getKeyString()),
+                            String.format("%s (%s).", tutorialStrings.TEXT[0], getLastActionString()));
+                }
+                super.render(sb);
+            }
         }
 
         public void update() {
@@ -56,7 +79,7 @@ public class UndoButtonUI {
                 hide();
             }
             if (!isHidden && isClickable()) {
-                setClickable(AbstractDungeon.actionManager.phase == GameActionManager.Phase.WAITING_ON_USER);
+                setClickable(UndoButtonMod.controller.isSafeToUndo());
             }
             super.update();
         }
@@ -85,25 +108,21 @@ public class UndoButtonUI {
                 tint.a = 0.0F;
             }
         }
+
+        protected abstract InputAction getInputAction();
+        protected abstract String getLastActionString();
     }
 
     class UndoButton extends UndoOrRedoButton {
+
         public UndoButton() {
             super(undoButtonTexture, ENERGY_X - (undoButtonTexture.getWidth() + HORIZONTAL_SPACING) / 2, ENERGY_Y + ENERGY_Y_OFFSET);
-            setX(x - undoButtonTexture.getWidth() * Settings.scale / 2);
-            setY(y - undoButtonTexture.getHeight() * Settings.scale / 2);
-        }
-
-        @Override
-        public void render(SpriteBatch sb) {
-            if (!isHidden) {
-                super.render(sb);
-            }
+            tutorialStrings = CardCrawlGame.languagePack.getTutorialString(UndoButtonMod.makeID("Undo Tip"));
         }
 
         @Override
         public void update() {
-            if(UndoButtonMod.controller.canUndo()) {
+            if (UndoButtonMod.controller.canUndo()) {
                 show();
                 setClickable(true);
             } else {
@@ -115,25 +134,27 @@ public class UndoButtonUI {
         protected void onClick() {
             UndoButtonMod.controller.undo();
         }
+
+        @Override
+        protected InputAction getInputAction() {
+            return UndoButtonMod.undoInputAction;
+        }
+
+        @Override
+        protected String getLastActionString() {
+            return UndoButtonMod.controller.getUndoActionString();
+        }
     }
 
     class RedoButton extends UndoOrRedoButton {
         public RedoButton() {
             super(redoButtonTexture, ENERGY_X + (redoButtonTexture.getWidth() + HORIZONTAL_SPACING) / 2, ENERGY_Y + ENERGY_Y_OFFSET);
-            setX(x - redoButtonTexture.getWidth() * Settings.scale / 2);
-            setY(y - redoButtonTexture.getHeight() * Settings.scale / 2);
-        }
-
-        @Override
-        public void render(SpriteBatch sb) {
-            if (!isHidden) {
-                super.render(sb);
-            }
+            tutorialStrings = CardCrawlGame.languagePack.getTutorialString(UndoButtonMod.makeID("Redo Tip"));
         }
 
         @Override
         public void update() {
-            if(UndoButtonMod.controller.canRedo()) {
+            if (UndoButtonMod.controller.canRedo()) {
                 show();
                 setClickable(true);
             } else {
@@ -144,6 +165,16 @@ public class UndoButtonUI {
 
         protected void onClick() {
             UndoButtonMod.controller.redo();
+        }
+
+        @Override
+        protected InputAction getInputAction() {
+            return UndoButtonMod.redoInputAction;
+        }
+
+        @Override
+        protected String getLastActionString() {
+            return UndoButtonMod.controller.getRedoActionString();
         }
     }
 }
