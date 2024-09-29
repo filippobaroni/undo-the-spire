@@ -43,7 +43,7 @@ public class UndoButtonUI {
         }
     }
 
-    abstract class UndoOrRedoButton extends ClickableUIElement {
+    abstract static class UndoOrRedoButton extends ClickableUIElement {
         protected boolean isHidden;
 
         public UndoOrRedoButton(Texture texture, float x, float y) {
