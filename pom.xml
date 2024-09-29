@@ -2,8 +2,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <properties>
-        <modID>basicmod</modID>
-        <author>Me! (Or well, you. If you want to use \"quotes\" make sure you have slashes in front of them like this.)</author>
+        <modID>undobutton</modID>
+        <author>delfad0r</author>
 
         <!-- Change the path for your system to match your Steam installation. -->
         <!-- If you're not sure, go to Slay the Spire in the Steam library, and choose Manage -> Browse local files -->
@@ -23,13 +23,11 @@
     </properties>
 
     <!-- This information will be displayed in ModTheSpire, the modded launcher. -->
-    <name>Basic Mod</name>
-    <version>0.0.0</version>
+    <name>Undo button</name>
+    <version>0.1.0</version>
     <!-- Avoid using \ in this description, as they can cause the description to fail to load. -->
     <!-- If you really want to use them, you'll need to "escape" them by putting another one in front, like \\ -->
-    <description>This is a description!\n"This" is a second line of description.
-        This "\\" is a slash. If you add another line like this:
-        All the spaces on the left of this will be gone. If you want spacing on a new line, do it:\n    like this.</description>
+    <description>Add a button to undo the last action.</description>
 
     <!--You shouldn't need to change anything below this point, but feel free to look at it.-->
     <!--You'll get a warning regarding these when you package your mod, but don't worry, it's just set up like this for convenience.-->
@@ -68,6 +66,13 @@
             <version>2.4.0</version>
             <scope>system</scope>
             <systemPath>${steam.path}/workshop/content/646570/1609158507/StSLib.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>savestate</groupId>
+            <artifactId>savestate</artifactId>
+            <version>1.3.0</version>
+            <scope>system</scope>
+            <systemPath>${steam.path}/workshop/content/646570/2489671162/SaveStateMod.jar</systemPath>
         </dependency>
     </dependencies>
 

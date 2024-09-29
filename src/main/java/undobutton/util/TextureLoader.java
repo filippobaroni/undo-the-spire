@@ -1,4 +1,4 @@
-package basicmod.util;
+package undobutton.util;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
@@ -9,7 +9,7 @@ import com.megacrit.cardcrawl.cards.AbstractCard;
 import java.util.HashMap;
 import java.util.Locale;
 
-import static basicmod.BasicMod.*;
+import static undobutton.UndoButtonMod.*;
 
 public class TextureLoader {
     private static final HashMap<String, Texture> textures = new HashMap<>();
@@ -120,16 +120,5 @@ public class TextureLoader {
         }
         logger.info("Loaded texture " + textureString);
         textures.put(textureString, texture);
-    }
-
-    public static Texture getPowerTexture(final String powerName)
-    {
-        String textureString = powerPath(powerName + ".png");
-        return getTexture(textureString);
-    }
-    public static Texture getHiDefPowerTexture(final String powerName)
-    {
-        String textureString = powerPath("large/" + powerName + ".png");
-        return getTextureNull(textureString);
     }
 }

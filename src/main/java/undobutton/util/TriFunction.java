@@ -1,7 +1,4 @@
-package basicmod.util;
-
-import java.util.Objects;
-import java.util.function.Function;
+package undobutton.util;
 
 @FunctionalInterface
 public interface TriFunction<T, U, V, R> {

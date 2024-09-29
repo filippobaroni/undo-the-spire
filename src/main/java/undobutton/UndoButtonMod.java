@@ -1,12 +1,17 @@
-package basicmod;
+package undobutton;
 
 import basemod.BaseMod;
-import basemod.interfaces.EditKeywordsSubscriber;
-import basemod.interfaces.EditStringsSubscriber;
-import basemod.interfaces.PostInitializeSubscriber;
-import basicmod.util.GeneralUtils;
-import basicmod.util.KeywordInfo;
-import basicmod.util.TextureLoader;
+import basemod.DevConsole;
+import basemod.interfaces.*;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.megacrit.cardcrawl.actions.GameActionManager;
+import com.megacrit.cardcrawl.cards.AbstractCard;
+import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import com.megacrit.cardcrawl.potions.AbstractPotion;
+import com.megacrit.cardcrawl.rooms.AbstractRoom;
+import undobutton.util.GeneralUtils;
+import undobutton.util.TextureLoader;
 import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.LwjglFileHandle;
@@ -17,26 +22,31 @@ import com.evacipated.cardcrawl.modthespire.Loader;
 import com.evacipated.cardcrawl.modthespire.ModInfo;
 import com.evacipated.cardcrawl.modthespire.Patcher;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
-import com.google.gson.Gson;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.localization.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.scannotation.AnnotationDB;
 
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @SpireInitializer
-public class BasicMod implements
+public class UndoButtonMod implements
         EditStringsSubscriber,
-        EditKeywordsSubscriber,
-        PostInitializeSubscriber {
+        PostInitializeSubscriber,
+        OnStartBattleSubscriber,
+        RenderSubscriber,
+        PostUpdateSubscriber,
+        OnCardUseSubscriber,
+        PrePotionUseSubscriber {
     public static ModInfo info;
-    public static String modID; //Edit your pom.xml to change this
+    public static String modID;
     static { loadModInfo(); }
     private static final String resourcesFolder = checkResourcesPath();
     public static final Logger logger = LogManager.getLogger(modID); //Used to output to the console.
+    public static UndoButtonController controller;
+    public static UndoButtonUI ui;
+
 
     //This is used to prefix the IDs of various objects like cards and relics,
     //to avoid conflicts between different mods using the same name for things.
@@ -46,12 +56,15 @@ public class BasicMod implements
 
     //This will be called by ModTheSpire because of the @SpireInitializer annotation at the top of the class.
     public static void initialize() {
-        new BasicMod();
+        new UndoButtonMod();
     }
 
-    public BasicMod() {
+    public UndoButtonMod() {
+        controller = new UndoButtonController(logger);
+        ui = new UndoButtonUI();
+        UndoButtonController.MAX_UNDO = 100;
         BaseMod.subscribe(this); //This will make BaseMod trigger all the subscribers at their appropriate times.
-        logger.info(modID + " subscribed to BaseMod.");
+        logger.info("{} subscribed to BaseMod.", modID);
     }
 
     @Override
@@ -64,6 +77,64 @@ public class BasicMod implements
         //If you want to set up a config panel, that will be done here.
         //The Mod Badges page has a basic example of this, but setting up config is overall a bit complex.
         BaseMod.registerModBadge(badgeTexture, info.Name, GeneralUtils.arrToString(info.Authors), info.Description, null);
+
+        // Initialise the UI
+        ui.initialize();
+    }
+
+    @Override
+    public void receiveOnBattleStart(AbstractRoom room) {
+        controller.clearStates();
+    }
+
+    @Override
+    public void receiveRender(SpriteBatch sb) {
+        ui.render(sb);
+    }
+
+    @Override
+    public void receivePostUpdate() {
+        ui.update();
+        if(AbstractDungeon.getCurrMapNode() == null) {
+            return;
+        }
+        AbstractRoom room = AbstractDungeon.getCurrRoom();
+        if (room == null || room.phase != AbstractRoom.RoomPhase.COMBAT) {
+            return;
+        }
+        if (AbstractDungeon.isScreenUp || AbstractDungeon.actionManager.phase != GameActionManager.Phase.WAITING_ON_USER) {
+            return;
+        }
+        if (DevConsole.visible) {
+            return;
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.U)) {
+            controller.undo();
+        } else if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
+            controller.redo();
+        }
+    }
+
+    @Override
+    public void receiveCardUsed(AbstractCard card) {
+        if (card.isInAutoplay) {
+            return;
+        }
+        controller.addState();
+        logger.info("Added new state before playing card {}", card.name);
+    }
+
+    @Override
+    public void receivePrePotionUse(AbstractPotion potion) {
+        if(AbstractDungeon.getCurrMapNode() == null) {
+            return;
+        }
+        AbstractRoom room = AbstractDungeon.getCurrRoom();
+        if (room == null || room.phase != AbstractRoom.RoomPhase.COMBAT) {
+            return;
+        }
+        controller.addState();
+        logger.info("Added new state before using potion {}", potion.name);
     }
 
     /*----------Localization----------*/
@@ -74,8 +145,6 @@ public class BasicMod implements
         return Settings.language.name().toLowerCase();
     }
     private static final String defaultLanguage = "eng";
-
-    public static final Map<String, KeywordInfo> keywords = new HashMap<>();
 
     @Override
     public void receiveEditStrings() {
@@ -99,58 +168,8 @@ public class BasicMod implements
     private void loadLocalization(String lang) {
         //While this does load every type of localization, most of these files are just outlines so that you can see how they're formatted.
         //Feel free to comment out/delete any that you don't end up using.
-        BaseMod.loadCustomStringsFile(CardStrings.class,
-                localizationPath(lang, "CardStrings.json"));
-        BaseMod.loadCustomStringsFile(CharacterStrings.class,
-                localizationPath(lang, "CharacterStrings.json"));
-        BaseMod.loadCustomStringsFile(EventStrings.class,
-                localizationPath(lang, "EventStrings.json"));
-        BaseMod.loadCustomStringsFile(OrbStrings.class,
-                localizationPath(lang, "OrbStrings.json"));
-        BaseMod.loadCustomStringsFile(PotionStrings.class,
-                localizationPath(lang, "PotionStrings.json"));
-        BaseMod.loadCustomStringsFile(PowerStrings.class,
-                localizationPath(lang, "PowerStrings.json"));
-        BaseMod.loadCustomStringsFile(RelicStrings.class,
-                localizationPath(lang, "RelicStrings.json"));
         BaseMod.loadCustomStringsFile(UIStrings.class,
                 localizationPath(lang, "UIStrings.json"));
-    }
-
-    @Override
-    public void receiveEditKeywords()
-    {
-        Gson gson = new Gson();
-        String json = Gdx.files.internal(localizationPath(defaultLanguage, "Keywords.json")).readString(String.valueOf(StandardCharsets.UTF_8));
-        KeywordInfo[] keywords = gson.fromJson(json, KeywordInfo[].class);
-        for (KeywordInfo keyword : keywords) {
-            keyword.prep();
-            registerKeyword(keyword);
-        }
-
-        if (!defaultLanguage.equals(getLangString())) {
-            try
-            {
-                json = Gdx.files.internal(localizationPath(getLangString(), "Keywords.json")).readString(String.valueOf(StandardCharsets.UTF_8));
-                keywords = gson.fromJson(json, KeywordInfo[].class);
-                for (KeywordInfo keyword : keywords) {
-                    keyword.prep();
-                    registerKeyword(keyword);
-                }
-            }
-            catch (Exception e)
-            {
-                logger.warn(modID + " does not support " + getLangString() + " keywords.");
-            }
-        }
-    }
-
-    private void registerKeyword(KeywordInfo info) {
-        BaseMod.addKeyword(modID.toLowerCase(), info.PROPER_NAME, info.NAMES, info.DESCRIPTION);
-        if (!info.ID.isEmpty())
-        {
-            keywords.put(info.ID, info);
-        }
     }
 
     //These methods are used to generate the correct filepaths to various parts of the resources folder.
@@ -161,21 +180,12 @@ public class BasicMod implements
     public static String imagePath(String file) {
         return resourcesFolder + "/images/" + file;
     }
-    public static String characterPath(String file) {
-        return resourcesFolder + "/images/character/" + file;
-    }
-    public static String powerPath(String file) {
-        return resourcesFolder + "/images/powers/" + file;
-    }
-    public static String relicPath(String file) {
-        return resourcesFolder + "/images/relics/" + file;
-    }
 
     /**
      * Checks the expected resources path based on the package name.
      */
     private static String checkResourcesPath() {
-        String name = BasicMod.class.getName(); //getPackage can be iffy with patching, so class name is used instead.
+        String name = UndoButtonMod.class.getName(); //getPackage can be iffy with patching, so class name is used instead.
         int separator = name.indexOf('.');
         if (separator > 0)
             name = name.substring(0, separator);
@@ -186,7 +196,7 @@ public class BasicMod implements
             throw new RuntimeException("\n\tFailed to find resources folder; expected it to be named \"" + name + "\"." +
                     " Either make sure the folder under resources has the same name as your mod's package, or change the line\n" +
                     "\t\"private static final String resourcesFolder = checkResourcesPath();\"\n" +
-                    "\tat the top of the " + BasicMod.class.getSimpleName() + " java file.");
+                    "\tat the top of the " + UndoButtonMod.class.getSimpleName() + " java file.");
         }
         if (!resources.child("images").exists()) {
             throw new RuntimeException("\n\tFailed to find the 'images' folder in the mod's 'resources/" + name + "' folder; Make sure the " +
@@ -209,7 +219,7 @@ public class BasicMod implements
             if (annotationDB == null)
                 return false;
             Set<String> initializers = annotationDB.getAnnotationIndex().getOrDefault(SpireInitializer.class.getName(), Collections.emptySet());
-            return initializers.contains(BasicMod.class.getName());
+            return initializers.contains(UndoButtonMod.class.getName());
         }).findFirst();
         if (infos.isPresent()) {
             info = infos.get();
