@@ -113,6 +113,9 @@ public class UndoButtonUI {
                     tint.a = 0.25F;
                     isClicked = false;
                 }
+                if (hitbox.justHovered) {
+                    CardCrawlGame.sound.play("UI_HOVER");
+                }
             }
         }
 
@@ -121,6 +124,10 @@ public class UndoButtonUI {
                 tint.a = 0.0F;
             }
             isClicked = false;
+        }
+
+        protected void onClick() {
+            CardCrawlGame.sound.play("UI_CLICK_1");
         }
 
         protected abstract InputAction getInputAction();
@@ -146,6 +153,7 @@ public class UndoButtonUI {
         }
 
         protected void onClick() {
+            super.onClick();
             UndoButtonMod.controller.undo();
         }
 
@@ -178,6 +186,7 @@ public class UndoButtonUI {
         }
 
         protected void onClick() {
+            super.onClick();
             UndoButtonMod.controller.redo();
         }
 
