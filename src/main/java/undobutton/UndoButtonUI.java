@@ -1,8 +1,11 @@
 package undobutton;
 
 import basemod.ClickableUIElement;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
@@ -50,11 +53,14 @@ public class UndoButtonUI {
         protected boolean isHidden;
         protected float width, height;
         protected TutorialStrings tutorialStrings;
+        protected boolean isClicked;
+        protected float alpha, targetAlpha;
 
         public UndoOrRedoButton(Texture texture, float x, float y) {
             super(texture, x, y, texture.getWidth(), texture.getHeight());
             width = texture.getWidth()* Settings.scale;
             height = texture.getHeight() * Settings.scale;
+            isClicked = false;
             setX(this.x - width / 2);
             setY(this.y - height / 2);
             hide();
@@ -69,7 +75,7 @@ public class UndoButtonUI {
                             String.format("%s (%s)", tutorialStrings.LABEL[0], getInputAction().getKeyString()),
                             String.format("%s (%s).", tutorialStrings.TEXT[0], getLastActionString()));
                 }
-                super.render(sb);
+                super.render(sb, new Color(1.0F, 1.0F, 1.0F, alpha));
             }
         }
 
@@ -78,34 +84,43 @@ public class UndoButtonUI {
                 hide();
             }
             if (!isHidden && isClickable()) {
-                setClickable(UndoButtonMod.controller.isSafeToUndo());
+                setClickable(UndoButtonMod.controller.isSafeToUndo() && AbstractDungeon.player.hoveredCard == null);
             }
             super.update();
+            if (!isHidden) {
+                targetAlpha = isClickable() ? 1.0F : 0.5F;
+                alpha = MathUtils.lerp(alpha, targetAlpha, Gdx.graphics.getDeltaTime() * 9.0F);
+            }
         }
 
         public void show() {
             isHidden = false;
+            tint.a = 0.0F;
         }
 
         public void hide() {
             isHidden = true;
             setClickable(false);
+            isClicked = false;
         }
 
         public void onHover() {
             if (!isHidden && isClickable()) {
                 if (InputHelper.isMouseDown) {
                     tint.a = 0.0F;
+                    isClicked = true;
                 } else {
                     tint.a = 0.25F;
+                    isClicked = false;
                 }
             }
         }
 
         public void onUnhover() {
-            if (!isHidden && isClickable()) {
+            if (!isHidden) {
                 tint.a = 0.0F;
             }
+            isClicked = false;
         }
 
         protected abstract InputAction getInputAction();
