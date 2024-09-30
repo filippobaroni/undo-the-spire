@@ -10,6 +10,7 @@ import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import savestate.CardState;
 import savestate.SaveStateMod;
+import savestate.monsters.MonsterState;
 import savestate.relics.RelicState;
 import undobutton.GameState;
 
@@ -33,6 +34,23 @@ public class StateSaveModPatches {
                 data.apply(__result);
             }
             return __result;
+        }
+    }
+
+    // There is a bug in MonsterState where a method tried to set the block colour to a float (instead of Color).
+    // This patch fixes that.
+    @SpirePatch(requiredModId = "SaveStateMod", clz = MonsterState.class, method = "populateSharedFields")
+    public static class MonsterPopulateSharedFieldsPatch {
+        @SpireInstrumentPatch
+        public static ExprEditor modifyPopulateSharedFields() {
+            return new ExprEditor() {
+                @Override
+                public void edit(MethodCall m) throws CannotCompileException {
+                    if (m.getMethodName().equals("setPrivate")) {
+                        m.replace("if (!$3.equals(\"blockTextColor\")) { $proceed($$); }");
+                    }
+                }
+            };
         }
     }
 
