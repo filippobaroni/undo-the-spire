@@ -12,16 +12,20 @@ import com.megacrit.cardcrawl.ui.panels.PotionPopUp;
 import savestate.SaveState;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.UUID;
 
 public class GameState {
+    public static final HashMap<UUID, CardData> extraCardData = new HashMap<>();
     private final SaveState saveState;
     public Action lastAction;
 
     public GameState(Action action) {
         saveState = new SaveState();
+        lastAction = action;
+        // Turn is not ending in GameState
         ReflectionHacks.setPrivate(saveState, SaveState.class, "endTurnQueued", false);
         ReflectionHacks.setPrivate(saveState, SaveState.class, "isEndingTurn", false);
-        lastAction = action;
     }
 
     public void apply() {
@@ -125,6 +129,22 @@ public class GameState {
                 default:
                     return "UNKNOWN ACTION TYPE";
             }
+        }
+    }
+
+    public static class CardData {
+        public final String name;
+        public final String description;
+
+        public CardData(AbstractCard card) {
+            name = card.name;
+            description = card.rawDescription;
+        }
+
+        public void apply(AbstractCard card) {
+            card.name = name;
+            card.rawDescription = description;
+            card.initializeDescription();
         }
     }
 }

@@ -1,4 +1,4 @@
-package undobutton;
+package undobutton.patches;
 
 import com.evacipated.cardcrawl.modthespire.lib.SpireInstrumentPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;

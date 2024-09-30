@@ -1,7 +1,9 @@
-package undobutton;
+package undobutton.patches;
 
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.actions.GameActionManager;
+import undobutton.GameState;
+import undobutton.UndoButtonMod;
 
 @SpirePatch(clz = GameActionManager.class, method = "callEndOfTurnActions")
 public class EndTurnPatch {
