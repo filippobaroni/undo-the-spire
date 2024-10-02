@@ -1,6 +1,5 @@
 package undobutton;
 
-import basemod.DevConsole;
 import com.megacrit.cardcrawl.actions.GameActionManager;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
@@ -31,9 +30,6 @@ public class UndoButtonController {
             return false;
         }
         if (AbstractDungeon.isScreenUp || !AbstractDungeon.actionManager.isEmpty() || AbstractDungeon.actionManager.phase != GameActionManager.Phase.WAITING_ON_USER) {
-            return false;
-        }
-        if (DevConsole.visible) {
             return false;
         }
         return true;

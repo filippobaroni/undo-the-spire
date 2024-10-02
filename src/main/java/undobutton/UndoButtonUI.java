@@ -55,6 +55,8 @@ public class UndoButtonUI {
         protected TutorialStrings tutorialStrings;
         protected boolean isClicked;
         protected float alpha, targetAlpha;
+        private float clickableTargetAlpha = 1.0F;
+        private static final float nonClickableTransparencyRadius = 150.0F;
 
         public UndoOrRedoButton(Texture texture, float x, float y) {
             super(texture, x, y, texture.getWidth(), texture.getHeight());
@@ -69,7 +71,7 @@ public class UndoButtonUI {
         @Override
         public void render(SpriteBatch sb) {
             if (!isHidden) {
-                if (hitbox.hovered) {
+                if (isClickable() && hitbox.hovered) {
                     TipHelper.renderGenericTip(x,
                             y + height + TOOLTIP_OFFSET,
                             String.format("%s (%s)", tutorialStrings.LABEL[0], getInputAction().getKeyString()),
@@ -84,11 +86,15 @@ public class UndoButtonUI {
                 hide();
             }
             if (!isHidden && isClickable()) {
-                setClickable(UndoButtonMod.controller.isSafeToUndo() && AbstractDungeon.player.hoveredCard == null);
+                setClickable(!AbstractDungeon.player.isDraggingCard && !AbstractDungeon.player.inSingleTargetMode && !AbstractDungeon.topPanel.potionUi.targetMode);
             }
             super.update();
             if (!isHidden) {
-                targetAlpha = isClickable() ? 1.0F : 0.5F;
+                if (isClickable()) {
+                    targetAlpha = clickableTargetAlpha;
+                } else {
+                    targetAlpha = clickableTargetAlpha * Math.max(0.25F, Math.min(1.0F, (float) Math.hypot(InputHelper.mX - x - width / 2, InputHelper.mY - y - height / 2) / Settings.scale / nonClickableTransparencyRadius - 1.0F));
+                }
                 alpha = MathUtils.lerp(alpha, targetAlpha, Gdx.graphics.getDeltaTime() * 9.0F);
             }
         }

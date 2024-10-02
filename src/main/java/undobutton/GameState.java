@@ -38,6 +38,8 @@ public class GameState {
         ReflectionHacks.setPrivate(AbstractDungeon.topPanel.potionUi, PotionPopUp.class, "hoveredMonster", null);
         // Load saveState
         saveState.loadState();
+        // Empty card queue
+        AbstractDungeon.actionManager.cardQueue.clear();
         // Reset glowing of end turn button
         AbstractDungeon.overlayMenu.endTurnButton.isGlowing = !AbstractDungeon.player.hand.canUseAnyCard();
         // Avoid monster animations

@@ -1,6 +1,7 @@
 package undobutton;
 
 import basemod.BaseMod;
+import basemod.DevConsole;
 import basemod.interfaces.*;
 import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Input;
@@ -102,7 +103,7 @@ public class UndoButtonMod implements
     @Override
     public void receivePostUpdate() {
         ui.update();
-        if(!controller.isSafeToUndo()) {
+        if (!controller.isSafeToUndo() || DevConsole.visible) {
             return;
         }
         if (undoInputAction.isJustPressed()) {

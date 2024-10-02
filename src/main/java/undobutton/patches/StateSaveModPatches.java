@@ -13,6 +13,7 @@ import savestate.SaveStateMod;
 import savestate.monsters.MonsterState;
 import savestate.relics.RelicState;
 import undobutton.GameState;
+import undobutton.UndoButtonMod;
 
 
 public class StateSaveModPatches {
@@ -32,6 +33,8 @@ public class StateSaveModPatches {
             GameState.CardData data = GameState.extraCardData.get(__result.uuid);
             if (data != null) {
                 data.apply(__result);
+            } else {
+                UndoButtonMod.logger.error("Extra card data not found for card with UUID {}", __result.uuid);
             }
             return __result;
         }
