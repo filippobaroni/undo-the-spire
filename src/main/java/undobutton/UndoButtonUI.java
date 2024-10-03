@@ -16,6 +16,7 @@ import com.megacrit.cardcrawl.localization.TutorialStrings;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import undobutton.util.TextureLoader;
 
+import static undobutton.UndoButtonMod.controller;
 import static undobutton.UndoButtonMod.imagePath;
 
 public class UndoButtonUI {
@@ -86,7 +87,7 @@ public class UndoButtonUI {
                 hide();
             }
             if (!isHidden && isClickable()) {
-                setClickable(!AbstractDungeon.player.isDraggingCard && !AbstractDungeon.player.inSingleTargetMode && !AbstractDungeon.topPanel.potionUi.targetMode);
+                setClickable(controller.isSafeToUndo() && !AbstractDungeon.player.isDraggingCard && !AbstractDungeon.player.inSingleTargetMode && !AbstractDungeon.topPanel.potionUi.targetMode);
             }
             super.update();
             if (!isHidden) {
