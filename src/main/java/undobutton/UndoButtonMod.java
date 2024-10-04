@@ -25,6 +25,8 @@ import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.scannotation.AnnotationDB;
+import savestate.CardState;
+import savestate.relics.RelicState;
 import undobutton.util.GeneralUtils;
 import undobutton.util.TextureLoader;
 
@@ -93,6 +95,8 @@ public class UndoButtonMod implements
     @Override
     public void receiveOnBattleStart(AbstractRoom room) {
         controller.clearStates();
+        CardState.resetFreeCards();
+        RelicState.resetFreeRelics();
     }
 
     @Override

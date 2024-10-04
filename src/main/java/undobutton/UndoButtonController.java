@@ -12,6 +12,7 @@ public class UndoButtonController {
     public static int MAX_UNDO = 0;
     private final ArrayDeque<GameState> pastGameStates = new ArrayDeque<>();
     private final ArrayDeque<GameState> futureGameStates = new ArrayDeque<>();
+    public boolean isThisEndTurnForced = false;
 
     public UndoButtonController(Logger logger) {
         this.logger = logger;
@@ -29,7 +30,7 @@ public class UndoButtonController {
         if (room == null || room.phase != AbstractRoom.RoomPhase.COMBAT) {
             return false;
         }
-        if (AbstractDungeon.isScreenUp || !AbstractDungeon.actionManager.isEmpty() || AbstractDungeon.actionManager.phase != GameActionManager.Phase.WAITING_ON_USER) {
+        if (AbstractDungeon.isScreenUp || !AbstractDungeon.actionManager.isEmpty() || AbstractDungeon.actionManager.phase != GameActionManager.Phase.WAITING_ON_USER || !AbstractDungeon.overlayMenu.endTurnButton.enabled) {
             return false;
         }
         return true;
