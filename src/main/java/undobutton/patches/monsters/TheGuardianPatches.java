@@ -1,4 +1,4 @@
-package undobutton.patches;
+package undobutton.patches.monsters;
 
 import basemod.ReflectionHacks;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
@@ -8,7 +8,7 @@ import com.megacrit.cardcrawl.monsters.exordium.TheGuardian;
 import savestate.monsters.exordium.TheGuardianState;
 
 @SpirePatch(clz = TheGuardianState.class, method = "loadMonster")
-public class TheGuardianStatePatch {
+public class TheGuardianPatches {
     @SpirePostfixPatch
     public static AbstractMonster setClosedOrOpenAnimation(AbstractMonster __result, TheGuardianState state) {
         TheGuardian monster = (TheGuardian) __result;
