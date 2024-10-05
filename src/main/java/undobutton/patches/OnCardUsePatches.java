@@ -17,7 +17,7 @@ public class OnCardUsePatches {
     public static class GetNextActionPatch {
         @SpireInsertPatch(locator = Locator.class)
         public static void CreateNewState(GameActionManager __instance) {
-            if (!((CardQueueItem) __instance.cardQueue.get(0)).autoplayCard) {
+            if (!((CardQueueItem) __instance.cardQueue.get(0)).autoplayCard && !((CardQueueItem) __instance.cardQueue.get(0)).card.dontTriggerOnUseCard) {
                 UndoButtonMod.controller.addState(new GameState.Action(GameState.ActionType.CARD_PLAYED, ((CardQueueItem) __instance.cardQueue.get(0)).card));
                 UndoButtonMod.logger.info("Added new state before playing card {}", ((CardQueueItem) __instance.cardQueue.get(0)).card.name);
             }
