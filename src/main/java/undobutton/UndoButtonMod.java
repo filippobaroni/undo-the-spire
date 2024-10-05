@@ -14,7 +14,6 @@ import com.evacipated.cardcrawl.modthespire.Loader;
 import com.evacipated.cardcrawl.modthespire.ModInfo;
 import com.evacipated.cardcrawl.modthespire.Patcher;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
-import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.helpers.input.InputAction;
@@ -42,7 +41,6 @@ public class UndoButtonMod implements
         OnStartBattleSubscriber,
         RenderSubscriber,
         PostUpdateSubscriber,
-        OnCardUseSubscriber,
         PrePotionUseSubscriber {
     public static ModInfo info;
     public static String modID;
@@ -117,14 +115,14 @@ public class UndoButtonMod implements
         }
     }
 
-    @Override
-    public void receiveCardUsed(AbstractCard card) {
-        if (card.isInAutoplay) {
-            return;
-        }
-        controller.addState(new GameState.Action(GameState.ActionType.CARD_PLAYED, card));
-        logger.info("Added new state before playing card {}", card.name);
-    }
+//    @Override
+//    public void receiveCardUsed(AbstractCard card) {
+//        if (card.isInAutoplay) {
+//            return;
+//        }
+//        controller.addState(new GameState.Action(GameState.ActionType.CARD_PLAYED, card));
+//        logger.info("Added new state before playing card {}", card.name);
+//    }
 
     @Override
     public void receivePrePotionUse(AbstractPotion potion) {

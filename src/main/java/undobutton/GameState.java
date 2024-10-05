@@ -99,7 +99,7 @@ public class GameState {
             switch (type) {
                 case CARD_PLAYED:
                     if (data instanceof AbstractCard) {
-                        card = (AbstractCard) data;
+                        card = ((AbstractCard) data).makeStatEquivalentCopy();
                         potion = null;
                     } else {
                         throw new IllegalArgumentException("Expected AbstractCard, got " + data.getClass().getName());
@@ -107,7 +107,7 @@ public class GameState {
                     break;
                 case POTION_USED:
                     if (data instanceof AbstractPotion) {
-                        potion = (AbstractPotion) data;
+                        potion = ((AbstractPotion) data).makeCopy();
                         card = null;
                     } else {
                         throw new IllegalArgumentException("Expected AbstractPotion, got " + data.getClass().getName());
