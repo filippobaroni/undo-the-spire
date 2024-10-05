@@ -30,6 +30,7 @@ public class CardStatePatches {
         public static AbstractCard Postfix(AbstractCard __result, CardState __instance) {
             __result.name = CardStatePatches.CardStateExtraFields.name.get(__instance);
             __result.rawDescription = CardStatePatches.CardStateExtraFields.description.get(__instance);
+            __result.initializeDescription();
             return __result;
         }
     }
