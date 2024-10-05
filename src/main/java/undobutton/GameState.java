@@ -48,7 +48,7 @@ public class GameState {
             m.hbAlpha = 1.0F;
             ReflectionHacks.setPrivate(m, AbstractCreature.class, "hbYOffset", 0.0F);
             ReflectionHacks.setPrivate(m, AbstractCreature.class, "hbShowTimer", 0.0F);
-            if (m.isDead) {
+            if (m.isDead || m.halfDead) {
                 for (String field : Arrays.asList("hbShadowColor", "hbBgColor", "hbTextColor", "blockOutlineColor")) {
                     ((Color) ReflectionHacks.getPrivate(m, AbstractCreature.class, field)).a = 0.0F;
                 }
