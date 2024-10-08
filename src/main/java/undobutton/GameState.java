@@ -8,6 +8,10 @@ import com.megacrit.cardcrawl.core.AbstractCreature;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import com.megacrit.cardcrawl.potions.AbstractPotion;
+import com.megacrit.cardcrawl.relics.AbstractRelic;
+import com.megacrit.cardcrawl.relics.BottledFlame;
+import com.megacrit.cardcrawl.relics.BottledLightning;
+import com.megacrit.cardcrawl.relics.BottledTornado;
 import com.megacrit.cardcrawl.ui.panels.PotionPopUp;
 import savestate.SaveState;
 
@@ -35,6 +39,8 @@ public class GameState {
         ReflectionHacks.setPrivate(AbstractDungeon.topPanel.potionUi, PotionPopUp.class, "hoveredMonster", null);
         // Load saveState
         saveState.loadState();
+        // Fix bottle relics
+        fixBottleRelic();
         // Empty card queue
         AbstractDungeon.actionManager.cardQueue.clear();
         // Reset glowing of end turn button
@@ -69,6 +75,33 @@ public class GameState {
             c.current_x = c.target_x;
             c.current_y = c.target_y;
             c.drawScale = c.targetDrawScale;
+        }
+    }
+
+    public void fixBottleRelic() {
+        for (AbstractRelic r : AbstractDungeon.player.relics) {
+            if (r.relicId.equals("Bottled Flame")) {
+                for (AbstractCard c : AbstractDungeon.player.masterDeck.group) {
+                    if (c.inBottleFlame) {
+                        ((BottledFlame) r).card = c;
+                        ((BottledFlame) r).setDescriptionAfterLoading();
+                    }
+                }
+            } else if (r.relicId.equals("Bottled Lightning")) {
+                for (AbstractCard c : AbstractDungeon.player.masterDeck.group) {
+                    if (c.inBottleLightning) {
+                        ((BottledLightning) r).card = c;
+                        ((BottledLightning) r).setDescriptionAfterLoading();
+                    }
+                }
+            } else if (r.relicId.equals("Bottled Tornado")) {
+                for (AbstractCard c : AbstractDungeon.player.masterDeck.group) {
+                    if (c.inBottleTornado) {
+                        ((BottledTornado) r).card = c;
+                        ((BottledTornado) r).setDescriptionAfterLoading();
+                    }
+                }
+            }
         }
     }
 
