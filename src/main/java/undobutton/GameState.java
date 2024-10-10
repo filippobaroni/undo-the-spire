@@ -62,6 +62,8 @@ public class GameState {
             }
             // No intent pulse
             m.intentAlpha = m.intentAlphaTarget;
+            // Faster intent animation
+            ReflectionHacks.setPrivate(m, AbstractMonster.class, "intentParticleTimer", 0.0F);
             // No block pulse
             ReflectionHacks.setPrivate(m, AbstractCreature.class, "blockAnimTimer", 0.0F);
             ReflectionHacks.setPrivate(m, AbstractCreature.class, "blockOffset", 0.0F);
