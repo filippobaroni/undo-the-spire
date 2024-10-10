@@ -13,12 +13,13 @@ import com.megacrit.cardcrawl.relics.BottledFlame;
 import com.megacrit.cardcrawl.relics.BottledLightning;
 import com.megacrit.cardcrawl.relics.BottledTornado;
 import com.megacrit.cardcrawl.ui.panels.PotionPopUp;
+import savestate.CreatureState;
 import savestate.SaveState;
 
 import java.util.Arrays;
 
 public class GameState {
-    private final SaveState saveState;
+    public final SaveState saveState;
     public Action lastAction;
 
     public GameState(Action action) {
@@ -27,6 +28,8 @@ public class GameState {
         // Turn is not ending in GameState
         ReflectionHacks.setPrivate(saveState, SaveState.class, "endTurnQueued", false);
         ReflectionHacks.setPrivate(saveState, SaveState.class, "isEndingTurn", false);
+        // Set player horizontal flip
+        ReflectionHacks.setPrivate(saveState.playerState, CreatureState.class, "flipHorizontal", UndoButtonMod.controller.isPlayerFlippedHorizontally);
     }
 
     public void apply() {
@@ -39,6 +42,8 @@ public class GameState {
         ReflectionHacks.setPrivate(AbstractDungeon.topPanel.potionUi, PotionPopUp.class, "hoveredMonster", null);
         // Load saveState
         saveState.loadState();
+        // Set isPlayerFlippedHorizontally
+        UndoButtonMod.controller.isPlayerFlippedHorizontally = ReflectionHacks.getPrivate(saveState.playerState, CreatureState.class, "flipHorizontal");
         // Fix bottle relics
         fixBottleRelic();
         // Empty card queue

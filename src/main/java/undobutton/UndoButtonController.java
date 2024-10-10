@@ -13,9 +13,16 @@ public class UndoButtonController {
     private final ArrayDeque<GameState> pastGameStates = new ArrayDeque<>();
     private final ArrayDeque<GameState> futureGameStates = new ArrayDeque<>();
     public boolean isThisEndTurnForced = false;
+    public boolean isPlayerFlippedHorizontally = false;
 
     public UndoButtonController(Logger logger) {
         this.logger = logger;
+    }
+
+    public void onStartBattle(AbstractRoom room) {
+        clearStates();
+        isThisEndTurnForced = false;
+        isPlayerFlippedHorizontally = false;
     }
 
     public boolean canUndo() {

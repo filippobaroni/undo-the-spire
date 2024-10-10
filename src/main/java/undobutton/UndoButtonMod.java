@@ -2,6 +2,7 @@ package undobutton;
 
 import basemod.BaseMod;
 import basemod.DevConsole;
+import basemod.ReflectionHacks;
 import basemod.interfaces.*;
 import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Input;
@@ -19,8 +20,10 @@ import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.helpers.input.InputAction;
 import com.megacrit.cardcrawl.localization.TutorialStrings;
 import com.megacrit.cardcrawl.localization.UIStrings;
+import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import com.megacrit.cardcrawl.potions.AbstractPotion;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
+import com.megacrit.cardcrawl.ui.panels.PotionPopUp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.scannotation.AnnotationDB;
@@ -92,9 +95,10 @@ public class UndoButtonMod implements
 
     @Override
     public void receiveOnBattleStart(AbstractRoom room) {
-        controller.clearStates();
+        controller.onStartBattle(room);
         CardState.resetFreeCards();
         RelicState.resetFreeRelics();
+        ui.onStartBattle(room);
     }
 
     @Override
@@ -115,15 +119,6 @@ public class UndoButtonMod implements
         }
     }
 
-//    @Override
-//    public void receiveCardUsed(AbstractCard card) {
-//        if (card.isInAutoplay) {
-//            return;
-//        }
-//        controller.addState(new GameState.Action(GameState.ActionType.CARD_PLAYED, card));
-//        logger.info("Added new state before playing card {}", card.name);
-//    }
-
     @Override
     public void receivePrePotionUse(AbstractPotion potion) {
         if(AbstractDungeon.getCurrMapNode() == null) {
@@ -135,6 +130,12 @@ public class UndoButtonMod implements
         }
         controller.addState(new GameState.Action(GameState.ActionType.POTION_USED, potion));
         logger.info("Added new state before using potion {}", potion.name);
+        if (AbstractDungeon.player.hasPower("Surrounded")) {
+            AbstractMonster m = ReflectionHacks.getPrivate(AbstractDungeon.topPanel.potionUi, PotionPopUp.class, "hoveredMonster");
+            if (m != null) {
+                UndoButtonMod.controller.isPlayerFlippedHorizontally = m.drawX < AbstractDungeon.player.drawX;
+            }
+        }
     }
 
     /*----------Localization----------*/

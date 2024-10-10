@@ -1,9 +1,11 @@
 package undobutton;
 
 import basemod.ClickableUIElement;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
@@ -32,6 +34,11 @@ public class UndoButtonUI {
         redoButton = new RedoButton();
     }
 
+    public void onStartBattle(AbstractRoom room) {
+        undoButton.onStartBattle(room);
+        redoButton.onStartBattle(room);
+    }
+
     public void render(SpriteBatch sb) {
         if (undoButton != null) {
             undoButton.render(sb);
@@ -56,8 +63,7 @@ public class UndoButtonUI {
         protected TutorialStrings tutorialStrings;
         protected boolean isClicked;
         protected float alpha, targetAlpha;
-        private float clickableTargetAlpha = 1.0F;
-        private static final float nonClickableTransparencyRadius = 150.0F;
+        protected float idleAlpha;
         protected Texture enabledTexture, disabledTexture;
 
         public UndoOrRedoButton(Texture enabledTexture, Texture disabledTexture, float x, float y) {
@@ -70,6 +76,12 @@ public class UndoButtonUI {
             setX(this.x - width / 2);
             setY(this.y - height / 2);
             hide();
+        }
+
+        public void onStartBattle(AbstractRoom room) {
+            idleAlpha = 1.0F;
+            targetAlpha = 1.0F;
+            alpha = 1.0F;
         }
 
         @Override
@@ -95,20 +107,19 @@ public class UndoButtonUI {
                 setClickable(controller.isSafeToUndo() && !AbstractDungeon.isScreenUp && !AbstractDungeon.player.isDraggingCard && !AbstractDungeon.player.inSingleTargetMode && !AbstractDungeon.topPanel.potionUi.targetMode);
             }
             super.update();
-            alpha = 1.0F;
             if (AbstractDungeon.overlayMenu != null && AbstractDungeon.overlayMenu.endTurnButton.enabled) {
                 image = enabledTexture;
             } else {
                 image = disabledTexture;
             }
-//            if (!isHidden) {
-//                if (isClickable()) {
-//                    targetAlpha = clickableTargetAlpha;
-//                } else {
-//                    targetAlpha = clickableTargetAlpha * Math.max(0.25F, Math.min(1.0F, (float) Math.hypot(InputHelper.mX - x - width / 2, InputHelper.mY - y - height / 2) / Settings.scale / nonClickableTransparencyRadius - 1.0F));
-//                }
-//                alpha = MathUtils.lerp(alpha, targetAlpha, Gdx.graphics.getDeltaTime() * 9.0F);
-//            }
+            if (!isHidden) {
+                if (isClickable() && hitbox.hovered) {
+                    targetAlpha = 1.0F;
+                } else {
+                    targetAlpha = idleAlpha;
+                }
+                alpha = MathUtils.lerp(alpha, targetAlpha, Gdx.graphics.getDeltaTime() * 9.0F);
+            }
         }
 
         public void show() {
@@ -188,6 +199,16 @@ public class UndoButtonUI {
         public RedoButton() {
             super(redoButtonTexture, redoButtonDisabledTexture, ENERGY_X + (redoButtonTexture.getWidth() + HORIZONTAL_SPACING) / 2, ENERGY_Y + ENERGY_Y_OFFSET);
             tutorialStrings = CardCrawlGame.languagePack.getTutorialString(UndoButtonMod.makeID("Redo Tip"));
+        }
+
+        @Override
+        public void onStartBattle(AbstractRoom room) {
+            super.onStartBattle(room);
+            if (room.monsters.getMonsterNames().contains("SpireShield")) {
+                idleAlpha = 0.6F;
+                targetAlpha = idleAlpha;
+                alpha = idleAlpha;
+            }
         }
 
         @Override
