@@ -99,7 +99,7 @@ public class UndoButtonMod implements
 
     @Override
     public void receiveRender(SpriteBatch sb) {
-        ui.render(sb);
+//        ui.render(sb);
     }
 
     @Override

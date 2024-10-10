@@ -1,11 +1,9 @@
 package undobutton;
 
 import basemod.ClickableUIElement;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.MathUtils;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
@@ -21,13 +19,15 @@ import static undobutton.UndoButtonMod.imagePath;
 
 public class UndoButtonUI {
     private static final float ENERGY_X = 198F, ENERGY_Y = 190F, ENERGY_Y_OFFSET = 128F, HORIZONTAL_SPACING = 10F, TOOLTIP_OFFSET = 120F;
-    private Texture undoButtonTexture, redoButtonTexture;
+    private Texture undoButtonTexture, undoButtonDisabledTexture, redoButtonTexture, redoButtonDisabledTexture;
     private UndoButton undoButton;
     private RedoButton redoButton;
 
     public void initialize() {
         undoButtonTexture = TextureLoader.getTexture(imagePath("buttons/undoButton.png"));
+        undoButtonDisabledTexture = TextureLoader.getTexture(imagePath("buttons/undoButtonDisabled.png"));
         redoButtonTexture = TextureLoader.getTexture(imagePath("buttons/redoButton.png"));
+        redoButtonDisabledTexture = TextureLoader.getTexture(imagePath("buttons/redoButtonDisabled.png"));
         undoButton = new UndoButton();
         redoButton = new RedoButton();
     }
@@ -58,11 +58,14 @@ public class UndoButtonUI {
         protected float alpha, targetAlpha;
         private float clickableTargetAlpha = 1.0F;
         private static final float nonClickableTransparencyRadius = 150.0F;
+        protected Texture enabledTexture, disabledTexture;
 
-        public UndoOrRedoButton(Texture texture, float x, float y) {
-            super(texture, x, y, texture.getWidth(), texture.getHeight());
-            width = texture.getWidth()* Settings.scale;
-            height = texture.getHeight() * Settings.scale;
+        public UndoOrRedoButton(Texture enabledTexture, Texture disabledTexture, float x, float y) {
+            super(enabledTexture, x, y, enabledTexture.getWidth(), enabledTexture.getHeight());
+            width = image.getWidth() * Settings.scale;
+            height = image.getHeight() * Settings.scale;
+            this.enabledTexture = enabledTexture;
+            this.disabledTexture = disabledTexture;
             isClicked = false;
             setX(this.x - width / 2);
             setY(this.y - height / 2);
@@ -83,21 +86,29 @@ public class UndoButtonUI {
         }
 
         public void update() {
-            if (AbstractDungeon.overlayMenu == null || AbstractDungeon.getCurrMapNode() == null || AbstractDungeon.getCurrRoom() == null || AbstractDungeon.getCurrRoom().phase != AbstractRoom.RoomPhase.COMBAT || !AbstractDungeon.overlayMenu.combatPanelsShown || AbstractDungeon.isScreenUp) {
+            if (AbstractDungeon.overlayMenu == null || AbstractDungeon.getCurrMapNode() == null || AbstractDungeon.getCurrRoom() == null || AbstractDungeon.getCurrRoom().phase != AbstractRoom.RoomPhase.COMBAT || !AbstractDungeon.overlayMenu.combatPanelsShown) {
                 hide();
+            } else {
+                show();
             }
             if (!isHidden && isClickable()) {
-                setClickable(controller.isSafeToUndo() && !AbstractDungeon.player.isDraggingCard && !AbstractDungeon.player.inSingleTargetMode && !AbstractDungeon.topPanel.potionUi.targetMode);
+                setClickable(controller.isSafeToUndo() && !AbstractDungeon.isScreenUp && !AbstractDungeon.player.isDraggingCard && !AbstractDungeon.player.inSingleTargetMode && !AbstractDungeon.topPanel.potionUi.targetMode);
             }
             super.update();
-            if (!isHidden) {
-                if (isClickable()) {
-                    targetAlpha = clickableTargetAlpha;
-                } else {
-                    targetAlpha = clickableTargetAlpha * Math.max(0.25F, Math.min(1.0F, (float) Math.hypot(InputHelper.mX - x - width / 2, InputHelper.mY - y - height / 2) / Settings.scale / nonClickableTransparencyRadius - 1.0F));
-                }
-                alpha = MathUtils.lerp(alpha, targetAlpha, Gdx.graphics.getDeltaTime() * 9.0F);
+            alpha = 1.0F;
+            if (AbstractDungeon.overlayMenu != null && AbstractDungeon.overlayMenu.endTurnButton.enabled) {
+                image = enabledTexture;
+            } else {
+                image = disabledTexture;
             }
+//            if (!isHidden) {
+//                if (isClickable()) {
+//                    targetAlpha = clickableTargetAlpha;
+//                } else {
+//                    targetAlpha = clickableTargetAlpha * Math.max(0.25F, Math.min(1.0F, (float) Math.hypot(InputHelper.mX - x - width / 2, InputHelper.mY - y - height / 2) / Settings.scale / nonClickableTransparencyRadius - 1.0F));
+//                }
+//                alpha = MathUtils.lerp(alpha, targetAlpha, Gdx.graphics.getDeltaTime() * 9.0F);
+//            }
         }
 
         public void show() {
@@ -144,19 +155,17 @@ public class UndoButtonUI {
     class UndoButton extends UndoOrRedoButton {
 
         public UndoButton() {
-            super(undoButtonTexture, ENERGY_X - (undoButtonTexture.getWidth() + HORIZONTAL_SPACING) / 2, ENERGY_Y + ENERGY_Y_OFFSET);
+            super(undoButtonTexture, undoButtonDisabledTexture, ENERGY_X - (undoButtonTexture.getWidth() + HORIZONTAL_SPACING) / 2, ENERGY_Y + ENERGY_Y_OFFSET);
             tutorialStrings = CardCrawlGame.languagePack.getTutorialString(UndoButtonMod.makeID("Undo Tip"));
         }
 
         @Override
         public void update() {
-            if (UndoButtonMod.controller.canUndo()) {
-                show();
-                setClickable(true);
-            } else {
-                hide();
-            }
+            setClickable(UndoButtonMod.controller.canUndo());
             super.update();
+            if (!UndoButtonMod.controller.canUndo()) {
+                image = disabledTexture;
+            }
         }
 
         protected void onClick() {
@@ -177,19 +186,17 @@ public class UndoButtonUI {
 
     class RedoButton extends UndoOrRedoButton {
         public RedoButton() {
-            super(redoButtonTexture, ENERGY_X + (redoButtonTexture.getWidth() + HORIZONTAL_SPACING) / 2, ENERGY_Y + ENERGY_Y_OFFSET);
+            super(redoButtonTexture, redoButtonDisabledTexture, ENERGY_X + (redoButtonTexture.getWidth() + HORIZONTAL_SPACING) / 2, ENERGY_Y + ENERGY_Y_OFFSET);
             tutorialStrings = CardCrawlGame.languagePack.getTutorialString(UndoButtonMod.makeID("Redo Tip"));
         }
 
         @Override
         public void update() {
-            if (UndoButtonMod.controller.canRedo()) {
-                show();
-                setClickable(true);
-            } else {
-                hide();
-            }
+            setClickable(UndoButtonMod.controller.canRedo());
             super.update();
+            if (!UndoButtonMod.controller.canRedo()) {
+                image = disabledTexture;
+            }
         }
 
         protected void onClick() {
