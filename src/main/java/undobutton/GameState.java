@@ -7,6 +7,7 @@ import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.core.AbstractCreature;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
+import com.megacrit.cardcrawl.orbs.AbstractOrb;
 import com.megacrit.cardcrawl.potions.AbstractPotion;
 import com.megacrit.cardcrawl.powers.BackAttackPower;
 import com.megacrit.cardcrawl.relics.AbstractRelic;
@@ -40,9 +41,7 @@ public class GameState {
                 UndoButtonMod.controller.isPlayerFlippedHorizontally = false;
             }
             ReflectionHacks.setPrivate(saveState.playerState, CreatureState.class, "flipHorizontal", UndoButtonMod.controller.isPlayerFlippedHorizontally);
-            Consumer<String> removeBackAttack = id -> saveState.curMapNodeState.monsterData.stream().filter(m -> m.id.equals(id)).forEach(m -> {
-                m.powers.removeIf(p -> p.powerId.equals("BackAttack"));
-            });
+            Consumer<String> removeBackAttack = id -> saveState.curMapNodeState.monsterData.stream().filter(m -> m.id.equals(id)).forEach(m -> m.powers.removeIf(p -> p.powerId.equals("BackAttack")));
             Consumer<String> addBackAttack = id -> saveState.curMapNodeState.monsterData.stream().filter(m -> m.id.equals(id)).forEach(m -> {
                 if (m.powers.stream().noneMatch(p -> p.powerId.equals("BackAttack"))) {
                     m.powers.add(0, new BackAttackPowerState(new BackAttackPower(AbstractDungeon.player)));
@@ -100,37 +99,47 @@ public class GameState {
             ReflectionHacks.setPrivate(m, AbstractCreature.class, "blockTextColor", new Color(0.9F, 0.9F, 0.9F, 1.0F));
         }
         // Avoid hand animations
-        for (AbstractCard c : AbstractDungeon.player.hand.group) {
+        AbstractDungeon.player.hand.group.forEach(c -> {
             c.angle = c.targetAngle;
             c.current_x = c.target_x;
             c.current_y = c.target_y;
             c.drawScale = c.targetDrawScale;
-        }
+        });
+        // Avoid orbs animations
+        AbstractDungeon.player.orbs.forEach(o -> {
+            o.cX = o.tX;
+            o.cY = o.tY;
+            ReflectionHacks.setPrivate(o, AbstractOrb.class, "channelAnimTimer", 0.0F);
+        });
     }
 
     public void fixBottleRelic() {
         for (AbstractRelic r : AbstractDungeon.player.relics) {
-            if (r.relicId.equals("Bottled Flame")) {
-                for (AbstractCard c : AbstractDungeon.player.masterDeck.group) {
-                    if (c.inBottleFlame) {
-                        ((BottledFlame) r).card = c;
-                        ((BottledFlame) r).setDescriptionAfterLoading();
+            switch (r.relicId) {
+                case "Bottled Flame":
+                    for (AbstractCard c : AbstractDungeon.player.masterDeck.group) {
+                        if (c.inBottleFlame) {
+                            ((BottledFlame) r).card = c;
+                            ((BottledFlame) r).setDescriptionAfterLoading();
+                        }
                     }
-                }
-            } else if (r.relicId.equals("Bottled Lightning")) {
-                for (AbstractCard c : AbstractDungeon.player.masterDeck.group) {
-                    if (c.inBottleLightning) {
-                        ((BottledLightning) r).card = c;
-                        ((BottledLightning) r).setDescriptionAfterLoading();
+                    break;
+                case "Bottled Lightning":
+                    for (AbstractCard c : AbstractDungeon.player.masterDeck.group) {
+                        if (c.inBottleLightning) {
+                            ((BottledLightning) r).card = c;
+                            ((BottledLightning) r).setDescriptionAfterLoading();
+                        }
                     }
-                }
-            } else if (r.relicId.equals("Bottled Tornado")) {
-                for (AbstractCard c : AbstractDungeon.player.masterDeck.group) {
-                    if (c.inBottleTornado) {
-                        ((BottledTornado) r).card = c;
-                        ((BottledTornado) r).setDescriptionAfterLoading();
+                    break;
+                case "Bottled Tornado":
+                    for (AbstractCard c : AbstractDungeon.player.masterDeck.group) {
+                        if (c.inBottleTornado) {
+                            ((BottledTornado) r).card = c;
+                            ((BottledTornado) r).setDescriptionAfterLoading();
+                        }
                     }
-                }
+                    break;
             }
         }
     }
