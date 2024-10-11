@@ -8,8 +8,8 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayDeque;
 
 public class UndoButtonController {
-    private final Logger logger;
     public static int MAX_UNDO = 0;
+    private final Logger logger;
     private final ArrayDeque<GameState> pastGameStates = new ArrayDeque<>();
     private final ArrayDeque<GameState> futureGameStates = new ArrayDeque<>();
     public boolean isThisEndTurnForced = false;
@@ -30,17 +30,14 @@ public class UndoButtonController {
     }
 
     public boolean isSafeToUndo() {
-        if(AbstractDungeon.getCurrMapNode() == null) {
+        if (AbstractDungeon.getCurrMapNode() == null) {
             return false;
         }
         AbstractRoom room = AbstractDungeon.getCurrRoom();
         if (room == null || room.phase != AbstractRoom.RoomPhase.COMBAT) {
             return false;
         }
-        if (AbstractDungeon.isScreenUp || !AbstractDungeon.actionManager.isEmpty() || AbstractDungeon.actionManager.phase != GameActionManager.Phase.WAITING_ON_USER || !AbstractDungeon.overlayMenu.endTurnButton.enabled) {
-            return false;
-        }
-        return true;
+        return !AbstractDungeon.isScreenUp && AbstractDungeon.actionManager.isEmpty() && AbstractDungeon.actionManager.phase == GameActionManager.Phase.WAITING_ON_USER && AbstractDungeon.overlayMenu.endTurnButton.enabled;
     }
 
     public boolean canRedo() {
@@ -76,7 +73,7 @@ public class UndoButtonController {
             return;
         }
         logger.info("Redoing.");
-        GameState state= futureGameStates.removeFirst();
+        GameState state = futureGameStates.removeFirst();
         pastGameStates.addFirst(new GameState(state.lastAction));
         state.apply();
     }
@@ -93,6 +90,7 @@ public class UndoButtonController {
         }
         return pastGameStates.getFirst().lastAction.toString();
     }
+
     public String getRedoActionString() {
         if (futureGameStates.isEmpty()) {
             return "";

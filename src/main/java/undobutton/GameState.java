@@ -8,6 +8,7 @@ import com.megacrit.cardcrawl.core.AbstractCreature;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import com.megacrit.cardcrawl.potions.AbstractPotion;
+import com.megacrit.cardcrawl.powers.BackAttackPower;
 import com.megacrit.cardcrawl.relics.AbstractRelic;
 import com.megacrit.cardcrawl.relics.BottledFlame;
 import com.megacrit.cardcrawl.relics.BottledLightning;
@@ -15,8 +16,10 @@ import com.megacrit.cardcrawl.relics.BottledTornado;
 import com.megacrit.cardcrawl.ui.panels.PotionPopUp;
 import savestate.CreatureState;
 import savestate.SaveState;
+import savestate.powers.powerstates.monsters.BackAttackPowerState;
 
 import java.util.Arrays;
+import java.util.function.Consumer;
 
 public class GameState {
     public final SaveState saveState;
@@ -28,8 +31,31 @@ public class GameState {
         // Turn is not ending in GameState
         ReflectionHacks.setPrivate(saveState, SaveState.class, "endTurnQueued", false);
         ReflectionHacks.setPrivate(saveState, SaveState.class, "isEndingTurn", false);
-        // Set player horizontal flip
-        ReflectionHacks.setPrivate(saveState.playerState, CreatureState.class, "flipHorizontal", UndoButtonMod.controller.isPlayerFlippedHorizontally);
+        // Handle surrounding
+        if (AbstractDungeon.getMonsters().getMonsterNames().contains("SpireShield")) {
+            if (AbstractDungeon.getMonsters().getMonster("SpireSpear").isDying) {
+                UndoButtonMod.controller.isPlayerFlippedHorizontally = true;
+            }
+            if (AbstractDungeon.getMonsters().getMonster("SpireShield").isDying) {
+                UndoButtonMod.controller.isPlayerFlippedHorizontally = false;
+            }
+            ReflectionHacks.setPrivate(saveState.playerState, CreatureState.class, "flipHorizontal", UndoButtonMod.controller.isPlayerFlippedHorizontally);
+            Consumer<String> removeBackAttack = id -> saveState.curMapNodeState.monsterData.stream().filter(m -> m.id.equals(id)).forEach(m -> {
+                m.powers.removeIf(p -> p.powerId.equals("BackAttack"));
+            });
+            Consumer<String> addBackAttack = id -> saveState.curMapNodeState.monsterData.stream().filter(m -> m.id.equals(id)).forEach(m -> {
+                if (m.powers.stream().noneMatch(p -> p.powerId.equals("BackAttack"))) {
+                    m.powers.add(0, new BackAttackPowerState(new BackAttackPower(AbstractDungeon.player)));
+                }
+            });
+            if (UndoButtonMod.controller.isPlayerFlippedHorizontally) {
+                removeBackAttack.accept("SpireShield");
+                addBackAttack.accept("SpireSpear");
+            } else {
+                removeBackAttack.accept("SpireSpear");
+                addBackAttack.accept("SpireShield");
+            }
+        }
     }
 
     public void apply() {
@@ -52,9 +78,6 @@ public class GameState {
         AbstractDungeon.overlayMenu.endTurnButton.isGlowing = !AbstractDungeon.player.hand.canUseAnyCard();
         // Avoid monster animations
         for (AbstractMonster m : AbstractDungeon.getCurrRoom().monsters.monsters) {
-            if (m.isDying) {
-                m.isDead = true;
-            }
             // No health bar pulse
             m.hbAlpha = 1.0F;
             ReflectionHacks.setPrivate(m, AbstractCreature.class, "hbYOffset", 0.0F);
@@ -134,6 +157,7 @@ public class GameState {
                     throw new IllegalArgumentException("Wrong argument type for ActionType " + type);
             }
         }
+
         public Action(ActionType type, Object data) {
             this.type = type;
             switch (type) {
@@ -157,6 +181,7 @@ public class GameState {
                     throw new IllegalArgumentException("Wrong argument type for ActionType " + type);
             }
         }
+
         public String toString() {
             switch (type) {
                 case CARD_PLAYED:

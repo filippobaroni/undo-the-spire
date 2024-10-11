@@ -4,7 +4,6 @@ import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.evacipated.cardcrawl.modthespire.patcher.PatchingException;
 import com.megacrit.cardcrawl.actions.GameActionManager;
 import com.megacrit.cardcrawl.cards.AbstractCard;
-import com.megacrit.cardcrawl.cards.CardQueueItem;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import javassist.CannotCompileException;
@@ -19,11 +18,11 @@ public class OnCardUsePatches {
     public static class GetNextActionPatch {
         @SpireInsertPatch(locator = Locator.class)
         public static void CreateNewState(GameActionManager __instance) {
-            if (!((CardQueueItem) __instance.cardQueue.get(0)).autoplayCard && !((CardQueueItem) __instance.cardQueue.get(0)).card.dontTriggerOnUseCard) {
-                UndoButtonMod.controller.addState(new GameState.Action(GameState.ActionType.CARD_PLAYED, ((CardQueueItem) __instance.cardQueue.get(0)).card));
-                UndoButtonMod.logger.info("Added new state before playing card {}", ((CardQueueItem) __instance.cardQueue.get(0)).card.name);
-                if (AbstractDungeon.player.hasPower("Surrounded")) {
-                    AbstractMonster m = ((CardQueueItem) __instance.cardQueue.get(0)).monster;
+            if (!__instance.cardQueue.get(0).autoplayCard && !__instance.cardQueue.get(0).card.dontTriggerOnUseCard) {
+                UndoButtonMod.controller.addState(new GameState.Action(GameState.ActionType.CARD_PLAYED, __instance.cardQueue.get(0).card));
+                UndoButtonMod.logger.info("Added new state before playing card {}", __instance.cardQueue.get(0).card.name);
+                if (AbstractDungeon.getMonsters().getMonsterNames().contains("SpireShield")) {
+                    AbstractMonster m = __instance.cardQueue.get(0).monster;
                     if (m != null) {
                         UndoButtonMod.controller.isPlayerFlippedHorizontally = m.drawX < AbstractDungeon.player.drawX;
                     }

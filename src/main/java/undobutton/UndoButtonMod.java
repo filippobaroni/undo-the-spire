@@ -45,15 +45,26 @@ public class UndoButtonMod implements
         RenderSubscriber,
         PostUpdateSubscriber,
         PrePotionUseSubscriber {
+    private static final String resourcesFolder = checkResourcesPath();
+    private static final String defaultLanguage = "eng";
     public static ModInfo info;
     public static String modID;
-    static { loadModInfo(); }
-    private static final String resourcesFolder = checkResourcesPath();
     public static final Logger logger = LogManager.getLogger(modID); //Used to output to the console.
     public static UndoButtonController controller;
     public static UndoButtonUI ui;
     public static InputAction undoInputAction, redoInputAction;
 
+    static {
+        loadModInfo();
+    }
+
+    public UndoButtonMod() {
+        controller = new UndoButtonController(logger);
+        ui = new UndoButtonUI();
+        UndoButtonController.MAX_UNDO = 100;
+        BaseMod.subscribe(this); //This will make BaseMod trigger all the subscribers at their appropriate times.
+        logger.info("{} subscribed to BaseMod.", modID);
+    }
 
     //This is used to prefix the IDs of various objects like cards and relics,
     //to avoid conflicts between different mods using the same name for things.
@@ -66,12 +77,68 @@ public class UndoButtonMod implements
         new UndoButtonMod();
     }
 
-    public UndoButtonMod() {
-        controller = new UndoButtonController(logger);
-        ui = new UndoButtonUI();
-        UndoButtonController.MAX_UNDO = 100;
-        BaseMod.subscribe(this); //This will make BaseMod trigger all the subscribers at their appropriate times.
-        logger.info("{} subscribed to BaseMod.", modID);
+    //This is used to load the appropriate localization files based on language.
+    private static String getLangString() {
+        return Settings.language.name().toLowerCase();
+    }
+
+    //These methods are used to generate the correct filepaths to various parts of the resources folder.
+    public static String localizationPath(String lang, String file) {
+        return resourcesFolder + "/localization/" + lang + "/" + file;
+    }
+
+    public static String imagePath(String file) {
+        return resourcesFolder + "/images/" + file;
+    }
+
+    /**
+     * Checks the expected resources path based on the package name.
+     */
+    private static String checkResourcesPath() {
+        String name = UndoButtonMod.class.getName(); //getPackage can be iffy with patching, so class name is used instead.
+        int separator = name.indexOf('.');
+        if (separator > 0)
+            name = name.substring(0, separator);
+
+        FileHandle resources = new LwjglFileHandle(name, Files.FileType.Internal);
+
+        if (!resources.exists()) {
+            throw new RuntimeException("\n\tFailed to find resources folder; expected it to be named \"" + name + "\"." +
+                    " Either make sure the folder under resources has the same name as your mod's package, or change the line\n" +
+                    "\t\"private static final String resourcesFolder = checkResourcesPath();\"\n" +
+                    "\tat the top of the " + UndoButtonMod.class.getSimpleName() + " java file.");
+        }
+        if (!resources.child("images").exists()) {
+            throw new RuntimeException("\n\tFailed to find the 'images' folder in the mod's 'resources/" + name + "' folder; Make sure the " +
+                    "images folder is in the correct location.");
+        }
+        if (!resources.child("localization").exists()) {
+            throw new RuntimeException("\n\tFailed to find the 'localization' folder in the mod's 'resources/" + name + "' folder; Make sure the " +
+                    "localization folder is in the correct location.");
+        }
+
+        return name;
+    }
+
+    /*----------Localization----------*/
+
+    /**
+     * This determines the mod's ID based on information stored by ModTheSpire.
+     */
+    private static void loadModInfo() {
+        Optional<ModInfo> infos = Arrays.stream(Loader.MODINFOS).filter((modInfo) -> {
+            AnnotationDB annotationDB = Patcher.annotationDBMap.get(modInfo.jarURL);
+            if (annotationDB == null)
+                return false;
+            Set<String> initializers = annotationDB.getAnnotationIndex().getOrDefault(SpireInitializer.class.getName(), Collections.emptySet());
+            return initializers.contains(UndoButtonMod.class.getName());
+        }).findFirst();
+        if (infos.isPresent()) {
+            info = infos.get();
+            modID = info.ID;
+        } else {
+            throw new RuntimeException("Failed to determine mod info/ID based on initializer.");
+        }
     }
 
     @Override
@@ -121,7 +188,7 @@ public class UndoButtonMod implements
 
     @Override
     public void receivePrePotionUse(AbstractPotion potion) {
-        if(AbstractDungeon.getCurrMapNode() == null) {
+        if (AbstractDungeon.getCurrMapNode() == null) {
             return;
         }
         AbstractRoom room = AbstractDungeon.getCurrRoom();
@@ -130,22 +197,13 @@ public class UndoButtonMod implements
         }
         controller.addState(new GameState.Action(GameState.ActionType.POTION_USED, potion));
         logger.info("Added new state before using potion {}", potion.name);
-        if (AbstractDungeon.player.hasPower("Surrounded")) {
+        if (AbstractDungeon.getMonsters().getMonsterNames().contains("SpireShield")) {
             AbstractMonster m = ReflectionHacks.getPrivate(AbstractDungeon.topPanel.potionUi, PotionPopUp.class, "hoveredMonster");
             if (m != null) {
                 UndoButtonMod.controller.isPlayerFlippedHorizontally = m.drawX < AbstractDungeon.player.drawX;
             }
         }
     }
-
-    /*----------Localization----------*/
-
-    //This is used to load the appropriate localization files based on language.
-    private static String getLangString()
-    {
-        return Settings.language.name().toLowerCase();
-    }
-    private static final String defaultLanguage = "eng";
 
     @Override
     public void receiveEditStrings() {
@@ -159,8 +217,7 @@ public class UndoButtonMod implements
         if (!defaultLanguage.equals(getLangString())) {
             try {
                 loadLocalization(getLangString());
-            }
-            catch (GdxRuntimeException e) {
+            } catch (GdxRuntimeException e) {
                 e.printStackTrace();
             }
         }
@@ -173,63 +230,5 @@ public class UndoButtonMod implements
                 localizationPath(lang, "UIStrings.json"));
         BaseMod.loadCustomStringsFile(TutorialStrings.class,
                 localizationPath(lang, "TutorialStrings.json"));
-    }
-
-    //These methods are used to generate the correct filepaths to various parts of the resources folder.
-    public static String localizationPath(String lang, String file) {
-        return resourcesFolder + "/localization/" + lang + "/" + file;
-    }
-
-    public static String imagePath(String file) {
-        return resourcesFolder + "/images/" + file;
-    }
-
-    /**
-     * Checks the expected resources path based on the package name.
-     */
-    private static String checkResourcesPath() {
-        String name = UndoButtonMod.class.getName(); //getPackage can be iffy with patching, so class name is used instead.
-        int separator = name.indexOf('.');
-        if (separator > 0)
-            name = name.substring(0, separator);
-
-        FileHandle resources = new LwjglFileHandle(name, Files.FileType.Internal);
-
-        if (!resources.exists()) {
-            throw new RuntimeException("\n\tFailed to find resources folder; expected it to be named \"" + name + "\"." +
-                    " Either make sure the folder under resources has the same name as your mod's package, or change the line\n" +
-                    "\t\"private static final String resourcesFolder = checkResourcesPath();\"\n" +
-                    "\tat the top of the " + UndoButtonMod.class.getSimpleName() + " java file.");
-        }
-        if (!resources.child("images").exists()) {
-            throw new RuntimeException("\n\tFailed to find the 'images' folder in the mod's 'resources/" + name + "' folder; Make sure the " +
-                    "images folder is in the correct location.");
-        }
-        if (!resources.child("localization").exists()) {
-            throw new RuntimeException("\n\tFailed to find the 'localization' folder in the mod's 'resources/" + name + "' folder; Make sure the " +
-                    "localization folder is in the correct location.");
-        }
-
-        return name;
-    }
-
-    /**
-     * This determines the mod's ID based on information stored by ModTheSpire.
-     */
-    private static void loadModInfo() {
-        Optional<ModInfo> infos = Arrays.stream(Loader.MODINFOS).filter((modInfo)->{
-            AnnotationDB annotationDB = Patcher.annotationDBMap.get(modInfo.jarURL);
-            if (annotationDB == null)
-                return false;
-            Set<String> initializers = annotationDB.getAnnotationIndex().getOrDefault(SpireInitializer.class.getName(), Collections.emptySet());
-            return initializers.contains(UndoButtonMod.class.getName());
-        }).findFirst();
-        if (infos.isPresent()) {
-            info = infos.get();
-            modID = info.ID;
-        }
-        else {
-            throw new RuntimeException("Failed to determine mod info/ID based on initializer.");
-        }
     }
 }

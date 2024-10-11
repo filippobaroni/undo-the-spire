@@ -160,6 +160,7 @@ public class UndoButtonUI {
         }
 
         protected abstract InputAction getInputAction();
+
         protected abstract String getLastActionString();
     }
 

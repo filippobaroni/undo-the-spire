@@ -12,28 +12,6 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class RoomStatePatches {
-    @SpirePatch(clz = MapRoomNodeState.class, method = SpirePatch.CLASS)
-    public static class RewardsField {
-        public static SpireField<ArrayList<RewardItem>> rewards = new SpireField<>(() -> null);
-    }
-
-    @SpirePatch(clz = MapRoomNodeState.class, method = SpirePatch.CONSTRUCTOR, paramtypez = {MapRoomNode.class})
-    public static class ConstructorPatch {
-        @SpirePostfixPatch
-        public static void PopulateRewards(MapRoomNodeState __instance, MapRoomNode node) {
-            RewardsField.rewards.set(__instance, node.room.rewards.stream().map(r -> copyRewardItem(r)).collect(Collectors.toCollection(ArrayList::new)));
-        }
-    }
-
-    @SpirePatch(clz = MapRoomNodeState.class, method = "loadMapRoomNode")
-    public static class LoadPatch {
-        @SpirePostfixPatch
-        public static MapRoomNode Postfix(MapRoomNode __result, MapRoomNodeState __instance) {
-            __result.room.rewards = RewardsField.rewards.get(__instance).stream().map(r -> copyRewardItem(r)).collect(Collectors.toCollection(ArrayList::new));
-            return __result;
-        }
-    }
-
     public static RewardItem copyRewardItem(RewardItem rewardItem) {
         switch (rewardItem.type) {
             case RELIC:
@@ -45,6 +23,28 @@ public class RoomStatePatches {
             default:
                 UndoButtonMod.logger.error("Unsupported reward type: {}", rewardItem.type);
                 throw new UnsupportedOperationException("Unsupported reward type: " + rewardItem.type);
+        }
+    }
+
+    @SpirePatch(clz = MapRoomNodeState.class, method = SpirePatch.CLASS)
+    public static class RewardsField {
+        public static SpireField<ArrayList<RewardItem>> rewards = new SpireField<>(() -> null);
+    }
+
+    @SpirePatch(clz = MapRoomNodeState.class, method = SpirePatch.CONSTRUCTOR, paramtypez = {MapRoomNode.class})
+    public static class ConstructorPatch {
+        @SpirePostfixPatch
+        public static void PopulateRewards(MapRoomNodeState __instance, MapRoomNode node) {
+            RewardsField.rewards.set(__instance, node.room.rewards.stream().map(RoomStatePatches::copyRewardItem).collect(Collectors.toCollection(ArrayList::new)));
+        }
+    }
+
+    @SpirePatch(clz = MapRoomNodeState.class, method = "loadMapRoomNode")
+    public static class LoadPatch {
+        @SpirePostfixPatch
+        public static MapRoomNode Postfix(MapRoomNode __result, MapRoomNodeState __instance) {
+            __result.room.rewards = RewardsField.rewards.get(__instance).stream().map(RoomStatePatches::copyRewardItem).collect(Collectors.toCollection(ArrayList::new));
+            return __result;
         }
     }
 }
