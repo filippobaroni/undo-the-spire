@@ -74,8 +74,8 @@ public class HexaghostPatches {
     }
 
     public static class OrbState {
-        public boolean activated = false;
-        public boolean hidden = false;
+        public boolean activated;
+        public boolean hidden;
 
         public OrbState(HexaghostOrb orb) {
             this.activated = orb.activated;
