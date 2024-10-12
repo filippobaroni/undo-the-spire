@@ -63,7 +63,7 @@ public class StateSaveModPatches {
     }
 
     // Patch SaveStateMod's RelicState to ignore the (arbitrary) limit of 100 on free relics.
-    @SpirePatch(requiredModId = "SaveStateMod", clz = RelicState.class, method = "freeRelic")
+    @SpirePatch(clz = RelicState.class, method = "freeRelic")
     public static class freeRelicPatch {
         @SpireInstrumentPatch
         public static ExprEditor modifyFreeCard() {

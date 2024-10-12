@@ -23,12 +23,24 @@ import java.util.Arrays;
 import java.util.function.Consumer;
 
 public class GameState {
+    public static Class<?>[] extraStateTypes;
+    public static Class<?>[] extraStateHandlers;
     public final SaveState saveState;
+    public final Object[] extraState;
     public Action lastAction;
 
     public GameState(Action action) {
-        saveState = new SaveState();
         lastAction = action;
+        saveState = new SaveState();
+        // Save extra state from @MakeUndoable classes
+        extraState = new Object[extraStateHandlers.length];
+        for (int i = 0; i < extraStateHandlers.length; i++) {
+            try {
+                extraState[i] = extraStateHandlers[i].getMethod("save").invoke(null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         // Turn is not ending in GameState
         ReflectionHacks.setPrivate(saveState, SaveState.class, "endTurnQueued", false);
         ReflectionHacks.setPrivate(saveState, SaveState.class, "isEndingTurn", false);
@@ -67,6 +79,14 @@ public class GameState {
         ReflectionHacks.setPrivate(AbstractDungeon.topPanel.potionUi, PotionPopUp.class, "hoveredMonster", null);
         // Load saveState
         saveState.loadState();
+        // Load extra state from @MakeUndoable classes
+        for (int i = 0; i < extraStateHandlers.length; i++) {
+            try {
+                extraStateHandlers[i].getMethod("load", extraStateTypes[i]).invoke(null, extraStateTypes[i].cast(extraState[i]));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
         // Set isPlayerFlippedHorizontally
         UndoButtonMod.controller.isPlayerFlippedHorizontally = ReflectionHacks.getPrivate(saveState.playerState, CreatureState.class, "flipHorizontal");
         // Fix bottle relics

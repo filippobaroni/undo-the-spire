@@ -15,6 +15,7 @@ import com.evacipated.cardcrawl.modthespire.Loader;
 import com.evacipated.cardcrawl.modthespire.ModInfo;
 import com.evacipated.cardcrawl.modthespire.Patcher;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
+import com.evacipated.cardcrawl.modthespire.lib.SpireSideload;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.helpers.input.InputAction;
@@ -24,20 +25,23 @@ import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import com.megacrit.cardcrawl.potions.AbstractPotion;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import com.megacrit.cardcrawl.ui.panels.PotionPopUp;
+import javassist.CannotCompileException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.scannotation.AnnotationDB;
 import savestate.CardState;
 import savestate.relics.RelicState;
 import undobutton.util.GeneralUtils;
+import undobutton.util.MakeUndoable;
 import undobutton.util.TextureLoader;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.lang.reflect.Modifier.isStatic;
 
 @SpireInitializer
+@SpireSideload(modIDs = {"SaveStateMod"})
 public class UndoButtonMod implements
         EditStringsSubscriber,
         PostInitializeSubscriber,
@@ -64,6 +68,38 @@ public class UndoButtonMod implements
         UndoButtonController.MAX_UNDO = 100;
         BaseMod.subscribe(this); //This will make BaseMod trigger all the subscribers at their appropriate times.
         logger.info("{} subscribed to BaseMod.", modID);
+        // Find all @MakeUndoable classes
+
+        ArrayList<Class<?>> handlers = findAllClassesWithAnnotation(MakeUndoable.class.getName()).stream().map(name -> {
+                    try {
+                        return (Class<?>) Loader.getClassPool().getOrNull(name).toClass();
+                    } catch (CannotCompileException e) {
+                        // This should never happen.
+                        throw new RuntimeException(e);
+                    }
+                }
+        ).collect(Collectors.toCollection(ArrayList::new));
+        GameState.extraStateHandlers = new Class<?>[handlers.size()];
+        GameState.extraStateTypes = new Class<?>[handlers.size()];
+        for (int i = 0; i < handlers.size(); i++) {
+            Class<?> h = handlers.get(i);
+            GameState.extraStateTypes[i] = h.getAnnotation(MakeUndoable.class).statetype();
+            try {
+                if (!isStatic(h.getMethod("save").getModifiers())) {
+                    throw new RuntimeException("Method save in class " + h.getName() + " must be static");
+                }
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException("Class " + h.getName() + " does not have a save method");
+            }
+            try {
+                if (!isStatic(h.getMethod("load", GameState.extraStateTypes[i]).getModifiers())) {
+                    throw new RuntimeException("Method load in class " + h.getName() + " must be static");
+                }
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException("Class " + h.getName() + " does not have a load method");
+            }
+            GameState.extraStateHandlers[i] = h;
+        }
     }
 
     //This is used to prefix the IDs of various objects like cards and relics,
@@ -118,6 +154,10 @@ public class UndoButtonMod implements
         }
 
         return name;
+    }
+
+    static private List<String> findAllClassesWithAnnotation(String annotationName) {
+        return Patcher.annotationDBMap.values().stream().map(db -> db.getAnnotationIndex().getOrDefault(annotationName, Collections.emptySet())).flatMap(Set::stream).collect(Collectors.toList());
     }
 
     /*----------Localization----------*/
