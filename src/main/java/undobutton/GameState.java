@@ -38,7 +38,7 @@ public class GameState {
             try {
                 extraState[i] = extraStateHandlers[i].getMethod("save").invoke(null);
             } catch (Exception e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         }
         // Turn is not ending in GameState
