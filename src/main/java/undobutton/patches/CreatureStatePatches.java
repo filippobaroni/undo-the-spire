@@ -20,6 +20,13 @@ public class CreatureStatePatches {
             }
         }
 
+        // Ignore animation of coordinates
+        @SpirePostfixPatch
+        public static void resetAnimationXY(CreatureState __instance, AbstractCreature creature) {
+            ReflectionHacks.setPrivate(__instance, CreatureState.class, "animX", 0.0F);
+            ReflectionHacks.setPrivate(__instance, CreatureState.class, "animY", 0.0F);
+        }
+
         // Store uuid
         @SpirePostfixPatch
         public static void setUUID(CreatureState __instance, AbstractCreature creature) {
