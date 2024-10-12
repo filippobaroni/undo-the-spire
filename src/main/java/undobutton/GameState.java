@@ -96,6 +96,8 @@ public class GameState {
         AbstractDungeon.actionManager.cardQueue.clear();
         // Reset glowing of end turn button
         AbstractDungeon.overlayMenu.endTurnButton.isGlowing = !AbstractDungeon.player.hand.canUseAnyCard();
+        // Reset glowing of cards in hand
+        AbstractDungeon.player.hand.glowCheck();
         // Avoid monster animations
         for (AbstractMonster m : AbstractDungeon.getCurrRoom().monsters.monsters) {
             // No health bar pulse
