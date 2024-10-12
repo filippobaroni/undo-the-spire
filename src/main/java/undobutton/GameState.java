@@ -20,6 +20,7 @@ import savestate.SaveState;
 import savestate.powers.powerstates.monsters.BackAttackPowerState;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class GameState {
@@ -177,13 +178,11 @@ public class GameState {
 
         public Action(ActionType type) {
             this.type = type;
-            switch (type) {
-                case TURN_ENDED:
-                    card = null;
-                    potion = null;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Wrong argument type for ActionType " + type);
+            if (Objects.requireNonNull(type) == ActionType.TURN_ENDED) {
+                card = null;
+                potion = null;
+            } else {
+                throw new IllegalArgumentException("Wrong argument type for ActionType " + type);
             }
         }
 
