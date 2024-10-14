@@ -37,7 +37,16 @@ public class UndoButtonController {
         if (room == null || room.phase != AbstractRoom.RoomPhase.COMBAT) {
             return false;
         }
-        return !AbstractDungeon.isScreenUp && AbstractDungeon.actionManager.isEmpty() && AbstractDungeon.actionManager.phase == GameActionManager.Phase.WAITING_ON_USER && AbstractDungeon.overlayMenu.endTurnButton.enabled;
+        if (AbstractDungeon.isScreenUp) {
+            switch (AbstractDungeon.screen) {
+                case HAND_SELECT:
+                    return true;
+                default:
+                    return false;
+            }
+        } else {
+            return AbstractDungeon.actionManager.isEmpty() && AbstractDungeon.actionManager.phase == GameActionManager.Phase.WAITING_ON_USER && AbstractDungeon.overlayMenu.endTurnButton.enabled;
+        }
     }
 
     public boolean canRedo() {

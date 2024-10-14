@@ -24,6 +24,8 @@ public class UndoButtonUI {
     private Texture undoButtonTexture, undoButtonDisabledTexture, redoButtonTexture, redoButtonDisabledTexture;
     private UndoButton undoButton;
     private RedoButton redoButton;
+    public static boolean isVisibleBelowScreen = false;
+    public static boolean isVisibleAboveScreen = false;
 
     public void initialize() {
         undoButtonTexture = TextureLoader.getTexture(imagePath("buttons/undoButton.png"));
@@ -49,6 +51,20 @@ public class UndoButtonUI {
     }
 
     public void update() {
+        isVisibleBelowScreen = false;
+        isVisibleAboveScreen = false;
+        if (AbstractDungeon.overlayMenu != null && AbstractDungeon.getCurrRoom() != null && AbstractDungeon.getCurrRoom().phase == AbstractRoom.RoomPhase.COMBAT && AbstractDungeon.overlayMenu.combatPanelsShown) {
+            if (AbstractDungeon.isScreenUp) {
+                switch (AbstractDungeon.screen) {
+                    case HAND_SELECT:
+                    case GRID:
+                        isVisibleAboveScreen = true;
+                        break;
+                }
+            } else {
+                isVisibleBelowScreen = true;
+            }
+        }
         if (undoButton != null) {
             undoButton.update();
         }
@@ -58,13 +74,12 @@ public class UndoButtonUI {
     }
 
     abstract static class UndoOrRedoButton extends ClickableUIElement {
-        protected boolean isHidden;
         protected float width, height;
         protected TutorialStrings tutorialStrings;
-        protected boolean isClicked;
         protected float alpha, targetAlpha;
         protected float idleAlpha;
         protected Texture enabledTexture, disabledTexture;
+        protected boolean isSpireAndShieldFight = false;
 
         public UndoOrRedoButton(Texture enabledTexture, Texture disabledTexture, float x, float y) {
             super(enabledTexture, x, y, enabledTexture.getWidth(), enabledTexture.getHeight());
@@ -72,21 +87,25 @@ public class UndoButtonUI {
             height = image.getHeight() * Settings.scale;
             this.enabledTexture = enabledTexture;
             this.disabledTexture = disabledTexture;
-            isClicked = false;
             setX(this.x - width / 2);
             setY(this.y - height / 2);
             hide();
+        }
+
+        public boolean isVisible() {
+            return isVisibleBelowScreen || isVisibleAboveScreen;
         }
 
         public void onStartBattle(AbstractRoom room) {
             idleAlpha = 1.0F;
             targetAlpha = 1.0F;
             alpha = 1.0F;
+            isSpireAndShieldFight = room.monsters.getMonsterNames().contains("SpireShield");
         }
 
         @Override
         public void render(SpriteBatch sb) {
-            if (!isHidden) {
+            if (isVisible()) {
                 if (isClickable() && hitbox.hovered) {
                     TipHelper.renderGenericTip(x,
                             y + height + TOOLTIP_OFFSET,
@@ -98,22 +117,18 @@ public class UndoButtonUI {
         }
 
         public void update() {
-            if (AbstractDungeon.overlayMenu == null || AbstractDungeon.getCurrMapNode() == null || AbstractDungeon.getCurrRoom() == null || AbstractDungeon.getCurrRoom().phase != AbstractRoom.RoomPhase.COMBAT || !AbstractDungeon.overlayMenu.combatPanelsShown) {
-                hide();
-            } else {
-                show();
+            if (isVisibleBelowScreen) {
+                image = AbstractDungeon.overlayMenu.endTurnButton.enabled ? enabledTexture : disabledTexture;
             }
-            if (!isHidden && isClickable()) {
-                setClickable(controller.isSafeToUndo() && !AbstractDungeon.isScreenUp && !AbstractDungeon.player.isDraggingCard && !AbstractDungeon.player.inSingleTargetMode && !AbstractDungeon.topPanel.potionUi.targetMode);
+            if (isVisibleAboveScreen) {
+                image = enabledTexture;
+            }
+            if (isVisible() && isClickable()) {
+                setClickable(controller.isSafeToUndo() && !AbstractDungeon.player.isDraggingCard && !AbstractDungeon.player.inSingleTargetMode && !AbstractDungeon.topPanel.potionUi.targetMode);
             }
             super.update();
-            if (AbstractDungeon.overlayMenu != null && AbstractDungeon.overlayMenu.endTurnButton.enabled) {
-                image = enabledTexture;
-            } else {
-                image = disabledTexture;
-            }
-            if (!isHidden) {
-                if (isClickable() && hitbox.hovered) {
+            if (isVisible()) {
+                if (isVisibleAboveScreen || (isClickable() && hitbox.hovered)) {
                     targetAlpha = 1.0F;
                 } else {
                     targetAlpha = idleAlpha;
@@ -122,25 +137,18 @@ public class UndoButtonUI {
             }
         }
 
-        public void show() {
-            isHidden = false;
-            tint.a = 0.0F;
-        }
-
         public void hide() {
-            isHidden = true;
+            isVisibleAboveScreen = false;
+            isVisibleBelowScreen = false;
             setClickable(false);
-            isClicked = false;
         }
 
         public void onHover() {
-            if (!isHidden && isClickable()) {
+            if (isVisible() && isClickable()) {
                 if (InputHelper.isMouseDown) {
                     tint.a = 0.0F;
-                    isClicked = true;
                 } else {
                     tint.a = 0.25F;
-                    isClicked = false;
                 }
                 if (hitbox.justHovered) {
                     CardCrawlGame.sound.play("UI_HOVER");
@@ -149,10 +157,9 @@ public class UndoButtonUI {
         }
 
         public void onUnhover() {
-            if (!isHidden) {
+            if (isVisible()) {
                 tint.a = 0.0F;
             }
-            isClicked = false;
         }
 
         protected void onClick() {
@@ -205,7 +212,7 @@ public class UndoButtonUI {
         @Override
         public void onStartBattle(AbstractRoom room) {
             super.onStartBattle(room);
-            if (room.monsters.getMonsterNames().contains("SpireShield")) {
+            if (isSpireAndShieldFight) {
                 idleAlpha = 0.6F;
                 targetAlpha = idleAlpha;
                 alpha = idleAlpha;

@@ -69,7 +69,6 @@ public class UndoButtonMod implements
         BaseMod.subscribe(this); //This will make BaseMod trigger all the subscribers at their appropriate times.
         logger.info("{} subscribed to BaseMod.", modID);
         // Find all @MakeUndoable classes
-
         ArrayList<Class<?>> handlers = findAllClassesWithAnnotation(MakeUndoable.class.getName()).stream().map(name -> {
                     try {
                         return (Class<?>) Loader.getClassPool().getOrNull(name).toClass();
@@ -210,7 +209,9 @@ public class UndoButtonMod implements
 
     @Override
     public void receiveRender(SpriteBatch sb) {
-//        ui.render(sb);
+        if (UndoButtonUI.isVisibleAboveScreen) {
+            ui.render(sb);
+        }
     }
 
     @Override
