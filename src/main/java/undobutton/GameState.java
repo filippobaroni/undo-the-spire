@@ -14,13 +14,16 @@ import com.megacrit.cardcrawl.relics.AbstractRelic;
 import com.megacrit.cardcrawl.relics.BottledFlame;
 import com.megacrit.cardcrawl.relics.BottledLightning;
 import com.megacrit.cardcrawl.relics.BottledTornado;
+import com.megacrit.cardcrawl.screens.select.HandCardSelectScreen;
 import com.megacrit.cardcrawl.ui.panels.PotionPopUp;
+import savestate.CardState;
 import savestate.CreatureState;
+import savestate.PlayerState;
 import savestate.SaveState;
 import savestate.powers.powerstates.monsters.BackAttackPowerState;
+import savestate.selectscreen.HandSelectScreenState;
 
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 public class GameState {
@@ -45,7 +48,7 @@ public class GameState {
         // Turn is not ending in GameState
         ReflectionHacks.setPrivate(saveState, SaveState.class, "endTurnQueued", false);
         ReflectionHacks.setPrivate(saveState, SaveState.class, "isEndingTurn", false);
-        // Handle surrounding
+        // Handle surrounding (Shield and Spear fight)
         if (AbstractDungeon.getMonsters().getMonsterNames().contains("SpireShield")) {
             if (AbstractDungeon.getMonsters().getMonster("SpireSpear").isDying) {
                 UndoButtonMod.controller.isPlayerFlippedHorizontally = true;
@@ -68,6 +71,19 @@ public class GameState {
                 addBackAttack.accept("SpireShield");
             }
         }
+        // Handle hand selection screen
+        switch ((AbstractDungeon.CurrentScreen) ReflectionHacks.getPrivate(saveState, SaveState.class, "screen")) {
+            case HAND_SELECT:
+                HandSelectScreenState screen = ReflectionHacks.getPrivate(saveState, SaveState.class, "handSelectScreenState");
+                CardState[] selectedCards = ReflectionHacks.getPrivate(screen, HandSelectScreenState.class, "selectedCards");
+                CardState[] hand = saveState.playerState.hand;
+                CardState[] newHand = new CardState[hand.length + selectedCards.length];
+                System.arraycopy(hand, 0, newHand, 0, hand.length);
+                System.arraycopy(selectedCards, 0, newHand, hand.length, selectedCards.length);
+                ReflectionHacks.setPrivateFinal(saveState.playerState, PlayerState.class, "hand", newHand);
+                ReflectionHacks.setPrivate(screen, HandSelectScreenState.class, "selectedCards", new CardState[0]);
+                break;
+        }
     }
 
     public void apply() {
@@ -88,6 +104,8 @@ public class GameState {
                 throw new RuntimeException(e);
             }
         }
+        // Fix screens
+        fixScreens();
         // Set isPlayerFlippedHorizontally
         UndoButtonMod.controller.isPlayerFlippedHorizontally = ReflectionHacks.getPrivate(saveState.playerState, CreatureState.class, "flipHorizontal");
         // Fix bottle relics
@@ -122,6 +140,7 @@ public class GameState {
             ReflectionHacks.setPrivate(m, AbstractCreature.class, "blockTextColor", new Color(0.9F, 0.9F, 0.9F, 1.0F));
         }
         // Avoid hand animations
+        AbstractDungeon.player.hand.refreshHandLayout();
         AbstractDungeon.player.hand.group.forEach(c -> {
             c.angle = c.targetAngle;
             c.current_x = c.target_x;
@@ -167,9 +186,17 @@ public class GameState {
         }
     }
 
+    public void fixScreens() {
+        switch (AbstractDungeon.screen) {
+            case HAND_SELECT:
+                ReflectionHacks.privateMethod(HandCardSelectScreen.class, "prep").invoke(AbstractDungeon.handCardSelectScreen);
+        }
+    }
+
     public enum ActionType {
         CARD_PLAYED,
         POTION_USED,
+        CARD_SELECTED,
         TURN_ENDED
     }
 
@@ -180,11 +207,17 @@ public class GameState {
 
         public Action(ActionType type) {
             this.type = type;
-            if (Objects.requireNonNull(type) == ActionType.TURN_ENDED) {
-                card = null;
-                potion = null;
-            } else {
-                throw new IllegalArgumentException("Wrong argument type for ActionType " + type);
+            switch (type) {
+                case TURN_ENDED:
+                    card = null;
+                    potion = null;
+                    break;
+                case CARD_SELECTED:
+                    card = null;
+                    potion = null;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Wrong argument type for ActionType " + type);
             }
         }
 
@@ -220,6 +253,8 @@ public class GameState {
                     return "use " + potion.name;
                 case TURN_ENDED:
                     return "end turn";
+                case CARD_SELECTED:
+                    return "select cards";
                 default:
                     return "UNKNOWN ACTION TYPE";
             }
