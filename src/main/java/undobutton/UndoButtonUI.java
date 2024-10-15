@@ -14,6 +14,7 @@ import com.megacrit.cardcrawl.helpers.input.InputAction;
 import com.megacrit.cardcrawl.helpers.input.InputHelper;
 import com.megacrit.cardcrawl.localization.TutorialStrings;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
+import com.megacrit.cardcrawl.ui.buttons.PeekButton;
 import undobutton.util.TextureLoader;
 
 import static undobutton.UndoButtonMod.controller;
@@ -128,8 +129,10 @@ public class UndoButtonUI {
             }
             super.update();
             if (isVisible()) {
-                if (isVisibleAboveScreen || (isClickable() && hitbox.hovered)) {
+                if (isClickable() && hitbox.hovered) {
                     targetAlpha = 1.0F;
+                } else if (isVisibleAboveScreen) {
+                    targetAlpha = PeekButton.isPeeking ? idleAlpha : 1.0F;
                 } else {
                     targetAlpha = idleAlpha;
                 }
