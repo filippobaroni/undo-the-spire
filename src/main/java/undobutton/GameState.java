@@ -5,8 +5,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.core.AbstractCreature;
+import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.OverlayMenu;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import com.megacrit.cardcrawl.localization.UIStrings;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import com.megacrit.cardcrawl.orbs.AbstractOrb;
 import com.megacrit.cardcrawl.potions.AbstractPotion;
@@ -213,6 +215,7 @@ public class GameState {
         private final ActionType type;
         private final AbstractCard card;
         private final AbstractPotion potion;
+        private final UIStrings uiStrings;
 
         public Action(ActionType type) {
             this.type = type;
@@ -220,10 +223,12 @@ public class GameState {
                 case TURN_ENDED:
                     card = null;
                     potion = null;
+                    uiStrings = CardCrawlGame.languagePack.getUIString("End Turn Action");
                     break;
                 case CARD_SELECTED:
                     card = null;
                     potion = null;
+                    uiStrings = CardCrawlGame.languagePack.getUIString("Select Cards Action");
                     break;
                 default:
                     throw new IllegalArgumentException("Wrong argument type for ActionType " + type);
@@ -237,6 +242,7 @@ public class GameState {
                     if (data instanceof AbstractCard) {
                         card = ((AbstractCard) data).makeStatEquivalentCopy();
                         potion = null;
+                        uiStrings = CardCrawlGame.languagePack.getUIString("Card Action");
                     } else {
                         throw new IllegalArgumentException("Expected AbstractCard, got " + data.getClass().getName());
                     }
@@ -245,6 +251,7 @@ public class GameState {
                     if (data instanceof AbstractPotion) {
                         potion = ((AbstractPotion) data).makeCopy();
                         card = null;
+                        uiStrings = CardCrawlGame.languagePack.getUIString("Potion Action");
                     } else {
                         throw new IllegalArgumentException("Expected AbstractPotion, got " + data.getClass().getName());
                     }
@@ -257,13 +264,13 @@ public class GameState {
         public String toString() {
             switch (type) {
                 case CARD_PLAYED:
-                    return "play " + card.name;
+                    return uiStrings.TEXT[0] + card.name;
                 case POTION_USED:
-                    return "use " + potion.name;
+                    return uiStrings.TEXT[0] + potion.name;
                 case TURN_ENDED:
-                    return "end turn";
+                    return uiStrings.TEXT[0];
                 case CARD_SELECTED:
-                    return "select cards";
+                    return uiStrings.TEXT[0];
                 default:
                     return "UNKNOWN ACTION TYPE";
             }
