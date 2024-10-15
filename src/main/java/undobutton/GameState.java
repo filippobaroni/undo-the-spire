@@ -223,12 +223,12 @@ public class GameState {
                 case TURN_ENDED:
                     card = null;
                     potion = null;
-                    uiStrings = CardCrawlGame.languagePack.getUIString("End Turn Action");
+                    uiStrings = CardCrawlGame.languagePack.getUIString(UndoButtonMod.makeID("End Turn Action"));
                     break;
                 case CARD_SELECTED:
                     card = null;
                     potion = null;
-                    uiStrings = CardCrawlGame.languagePack.getUIString("Select Cards Action");
+                    uiStrings = CardCrawlGame.languagePack.getUIString(UndoButtonMod.makeID("Select Cards Action"));
                     break;
                 default:
                     throw new IllegalArgumentException("Wrong argument type for ActionType " + type);
@@ -242,7 +242,7 @@ public class GameState {
                     if (data instanceof AbstractCard) {
                         card = ((AbstractCard) data).makeStatEquivalentCopy();
                         potion = null;
-                        uiStrings = CardCrawlGame.languagePack.getUIString("Card Action");
+                        uiStrings = CardCrawlGame.languagePack.getUIString(UndoButtonMod.makeID("Card Action"));
                     } else {
                         throw new IllegalArgumentException("Expected AbstractCard, got " + data.getClass().getName());
                     }
@@ -251,7 +251,7 @@ public class GameState {
                     if (data instanceof AbstractPotion) {
                         potion = ((AbstractPotion) data).makeCopy();
                         card = null;
-                        uiStrings = CardCrawlGame.languagePack.getUIString("Potion Action");
+                        uiStrings = CardCrawlGame.languagePack.getUIString(UndoButtonMod.makeID("Potion Action"));
                     } else {
                         throw new IllegalArgumentException("Expected AbstractPotion, got " + data.getClass().getName());
                     }

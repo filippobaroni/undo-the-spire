@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.evacipated.cardcrawl.modthespire.Loader;
 import com.evacipated.cardcrawl.modthespire.ModInfo;
 import com.evacipated.cardcrawl.modthespire.Patcher;
+import com.evacipated.cardcrawl.modthespire.lib.SpireConfig;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.evacipated.cardcrawl.modthespire.lib.SpireSideload;
 import com.megacrit.cardcrawl.core.Settings;
@@ -35,6 +36,7 @@ import undobutton.util.GeneralUtils;
 import undobutton.util.MakeUndoable;
 import undobutton.util.TextureLoader;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -42,13 +44,7 @@ import static java.lang.reflect.Modifier.isStatic;
 
 @SpireInitializer
 @SpireSideload(modIDs = {"SaveStateMod"})
-public class UndoButtonMod implements
-        EditStringsSubscriber,
-        PostInitializeSubscriber,
-        OnStartBattleSubscriber,
-        RenderSubscriber,
-        PostUpdateSubscriber,
-        PrePotionUseSubscriber {
+public class UndoButtonMod implements EditStringsSubscriber, PostInitializeSubscriber, OnStartBattleSubscriber, RenderSubscriber, PostUpdateSubscriber, PrePotionUseSubscriber {
     private static final String resourcesFolder = checkResourcesPath();
     private static final String defaultLanguage = "eng";
     public static ModInfo info;
@@ -57,27 +53,36 @@ public class UndoButtonMod implements
     public static UndoButtonController controller;
     public static UndoButtonUI ui;
     public static InputAction undoInputAction, redoInputAction;
+    private static SpireConfig optionsConfig;
 
     static {
         loadModInfo();
     }
 
+    //This is used to prefix the IDs of various objects like cards and relics,
+    //to avoid conflicts between different mods using the same name for things.
+
     public UndoButtonMod() {
+        Properties defaults = new Properties();
+        defaults.setProperty("maxStates", "100");
+        try {
+            optionsConfig = new SpireConfig(modID, "config", defaults);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         controller = new UndoButtonController(logger);
         ui = new UndoButtonUI();
-        UndoButtonController.MAX_UNDO = 100;
         BaseMod.subscribe(this); //This will make BaseMod trigger all the subscribers at their appropriate times.
         logger.info("{} subscribed to BaseMod.", modID);
         // Find all @MakeUndoable classes
         ArrayList<Class<?>> handlers = findAllClassesWithAnnotation(MakeUndoable.class.getName()).stream().map(name -> {
-                    try {
-                        return (Class<?>) Loader.getClassPool().getOrNull(name).toClass();
-                    } catch (CannotCompileException e) {
-                        // This should never happen.
-                        throw new RuntimeException(e);
-                    }
-                }
-        ).collect(Collectors.toCollection(ArrayList::new));
+            try {
+                return (Class<?>) Loader.getClassPool().getOrNull(name).toClass();
+            } catch (CannotCompileException e) {
+                // This should never happen.
+                throw new RuntimeException(e);
+            }
+        }).collect(Collectors.toCollection(ArrayList::new));
         GameState.extraStateHandlers = new Class<?>[handlers.size()];
         GameState.extraStateTypes = new Class<?>[handlers.size()];
         for (int i = 0; i < handlers.size(); i++) {
@@ -101,8 +106,19 @@ public class UndoButtonMod implements
         }
     }
 
-    //This is used to prefix the IDs of various objects like cards and relics,
-    //to avoid conflicts between different mods using the same name for things.
+    public static int getMaxStates() {
+        return optionsConfig.getInt("maxStates");
+    }
+
+    public static void setMaxStates(int numStates) {
+        optionsConfig.setInt("maxStates", numStates);
+        try {
+            optionsConfig.save();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static String makeID(String id) {
         return modID + ":" + id;
     }
@@ -132,24 +148,18 @@ public class UndoButtonMod implements
     private static String checkResourcesPath() {
         String name = UndoButtonMod.class.getName(); //getPackage can be iffy with patching, so class name is used instead.
         int separator = name.indexOf('.');
-        if (separator > 0)
-            name = name.substring(0, separator);
+        if (separator > 0) name = name.substring(0, separator);
 
         FileHandle resources = new LwjglFileHandle(name, Files.FileType.Internal);
 
         if (!resources.exists()) {
-            throw new RuntimeException("\n\tFailed to find resources folder; expected it to be named \"" + name + "\"." +
-                    " Either make sure the folder under resources has the same name as your mod's package, or change the line\n" +
-                    "\t\"private static final String resourcesFolder = checkResourcesPath();\"\n" +
-                    "\tat the top of the " + UndoButtonMod.class.getSimpleName() + " java file.");
+            throw new RuntimeException("\n\tFailed to find resources folder; expected it to be named \"" + name + "\"." + " Either make sure the folder under resources has the same name as your mod's package, or change the line\n" + "\t\"private static final String resourcesFolder = checkResourcesPath();\"\n" + "\tat the top of the " + UndoButtonMod.class.getSimpleName() + " java file.");
         }
         if (!resources.child("images").exists()) {
-            throw new RuntimeException("\n\tFailed to find the 'images' folder in the mod's 'resources/" + name + "' folder; Make sure the " +
-                    "images folder is in the correct location.");
+            throw new RuntimeException("\n\tFailed to find the 'images' folder in the mod's 'resources/" + name + "' folder; Make sure the " + "images folder is in the correct location.");
         }
         if (!resources.child("localization").exists()) {
-            throw new RuntimeException("\n\tFailed to find the 'localization' folder in the mod's 'resources/" + name + "' folder; Make sure the " +
-                    "localization folder is in the correct location.");
+            throw new RuntimeException("\n\tFailed to find the 'localization' folder in the mod's 'resources/" + name + "' folder; Make sure the " + "localization folder is in the correct location.");
         }
 
         return name;
@@ -159,26 +169,6 @@ public class UndoButtonMod implements
         return Patcher.annotationDBMap.values().stream().map(db -> db.getAnnotationIndex().getOrDefault(annotationName, Collections.emptySet())).flatMap(Set::stream).collect(Collectors.toList());
     }
 
-    /*----------Localization----------*/
-
-    /**
-     * This determines the mod's ID based on information stored by ModTheSpire.
-     */
-    private static void loadModInfo() {
-        Optional<ModInfo> infos = Arrays.stream(Loader.MODINFOS).filter((modInfo) -> {
-            AnnotationDB annotationDB = Patcher.annotationDBMap.get(modInfo.jarURL);
-            if (annotationDB == null)
-                return false;
-            Set<String> initializers = annotationDB.getAnnotationIndex().getOrDefault(SpireInitializer.class.getName(), Collections.emptySet());
-            return initializers.contains(UndoButtonMod.class.getName());
-        }).findFirst();
-        if (infos.isPresent()) {
-            info = infos.get();
-            modID = info.ID;
-        } else {
-            throw new RuntimeException("Failed to determine mod info/ID based on initializer.");
-        }
-    }
 
     @Override
     public void receivePostInitialize() {
@@ -189,7 +179,7 @@ public class UndoButtonMod implements
 
         //If you want to set up a config panel, that will be done here.
         //The Mod Badges page has a basic example of this, but setting up config is overall a bit complex.
-        BaseMod.registerModBadge(badgeTexture, info.Name, GeneralUtils.arrToString(info.Authors), info.Description, null);
+        BaseMod.registerModBadge(badgeTexture, info.Name, GeneralUtils.arrToString(info.Authors), info.Description, new UndoButtonSettingsPanel());
 
         // Initialise the UI
         ui.initialize();
@@ -246,6 +236,26 @@ public class UndoButtonMod implements
         }
     }
 
+    /*----------Localization----------*/
+
+    /**
+     * This determines the mod's ID based on information stored by ModTheSpire.
+     */
+    private static void loadModInfo() {
+        Optional<ModInfo> infos = Arrays.stream(Loader.MODINFOS).filter((modInfo) -> {
+            AnnotationDB annotationDB = Patcher.annotationDBMap.get(modInfo.jarURL);
+            if (annotationDB == null) return false;
+            Set<String> initializers = annotationDB.getAnnotationIndex().getOrDefault(SpireInitializer.class.getName(), Collections.emptySet());
+            return initializers.contains(UndoButtonMod.class.getName());
+        }).findFirst();
+        if (infos.isPresent()) {
+            info = infos.get();
+            modID = info.ID;
+        } else {
+            throw new RuntimeException("Failed to determine mod info/ID based on initializer.");
+        }
+    }
+
     @Override
     public void receiveEditStrings() {
         /*
@@ -267,9 +277,7 @@ public class UndoButtonMod implements
     private void loadLocalization(String lang) {
         //While this does load every type of localization, most of these files are just outlines so that you can see how they're formatted.
         //Feel free to comment out/delete any that you don't end up using.
-        BaseMod.loadCustomStringsFile(UIStrings.class,
-                localizationPath(lang, "UIStrings.json"));
-        BaseMod.loadCustomStringsFile(TutorialStrings.class,
-                localizationPath(lang, "TutorialStrings.json"));
+        BaseMod.loadCustomStringsFile(UIStrings.class, localizationPath(lang, "UIStrings.json"));
+        BaseMod.loadCustomStringsFile(TutorialStrings.class, localizationPath(lang, "TutorialStrings.json"));
     }
 }

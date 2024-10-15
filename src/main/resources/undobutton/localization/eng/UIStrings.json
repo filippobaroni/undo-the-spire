@@ -14,9 +14,14 @@
       "end turn"
     ]
   },
-  "${modID}:Select Cards": {
+  "${modID}:Select Cards Action": {
     "TEXT": [
       "select cards"
+    ]
+  },
+  "${modID}:Settings Num States": {
+    "TEXT": [
+      "Maximum number of undos:"
     ]
   }
 }

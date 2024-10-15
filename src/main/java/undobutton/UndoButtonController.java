@@ -8,7 +8,6 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayDeque;
 
 public class UndoButtonController {
-    public static int MAX_UNDO = 0;
     private final Logger logger;
     private final ArrayDeque<GameState> pastGameStates = new ArrayDeque<>();
     private final ArrayDeque<GameState> futureGameStates = new ArrayDeque<>();
@@ -60,9 +59,9 @@ public class UndoButtonController {
         // Add new state
         pastGameStates.addFirst(new GameState(action));
         // Remove the oldest state if queue is too long
-        if (pastGameStates.size() > MAX_UNDO) {
+        if (pastGameStates.size() > UndoButtonMod.getMaxStates()) {
             pastGameStates.removeLast();
-            logger.info("More than {} states in queue, removing oldest state.", MAX_UNDO);
+            logger.info("More than {} states in queue, removing oldest state.", UndoButtonMod.getMaxStates());
         }
     }
 
