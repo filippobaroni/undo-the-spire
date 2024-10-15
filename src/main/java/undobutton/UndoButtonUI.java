@@ -53,7 +53,7 @@ public class UndoButtonUI {
     public void update() {
         isVisibleBelowScreen = false;
         isVisibleAboveScreen = false;
-        if (AbstractDungeon.overlayMenu != null && AbstractDungeon.getCurrRoom() != null && AbstractDungeon.getCurrRoom().phase == AbstractRoom.RoomPhase.COMBAT && AbstractDungeon.overlayMenu.combatPanelsShown) {
+        if (AbstractDungeon.overlayMenu != null && AbstractDungeon.getCurrMapNode() != null && AbstractDungeon.getCurrRoom() != null && AbstractDungeon.getCurrRoom().phase == AbstractRoom.RoomPhase.COMBAT && AbstractDungeon.overlayMenu.combatPanelsShown) {
             if (AbstractDungeon.isScreenUp) {
                 switch (AbstractDungeon.screen) {
                     case HAND_SELECT:

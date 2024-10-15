@@ -1,11 +1,16 @@
 package undobutton.patches;
 
 import basemod.ReflectionHacks;
+import com.evacipated.cardcrawl.modthespire.lib.SpireField;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
+import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePrefixPatch;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
+import com.megacrit.cardcrawl.screens.select.GridCardSelectScreen;
 import com.megacrit.cardcrawl.screens.select.HandCardSelectScreen;
+import com.megacrit.cardcrawl.ui.buttons.PeekButton;
+import savestate.selectscreen.GridCardSelectScreenState;
 import savestate.selectscreen.HandSelectScreenState;
 import undobutton.GameState;
 import undobutton.UndoButtonMod;
@@ -28,13 +33,62 @@ public class ScreensPatches {
         }
     }
 
+    @SpirePatch(clz = HandSelectScreenState.class, method = SpirePatch.CLASS)
+    public static class HandExtraFields {
+        public static SpireField<String> selectionReason = new SpireField<>(() -> null);
+    }
+
+    @SpirePatch(clz = HandSelectScreenState.class, method = SpirePatch.CONSTRUCTOR)
+    public static class HandConstructorPatch {
+        @SpirePostfixPatch
+        public static void setSelectionReason(HandSelectScreenState __instance) {
+            HandExtraFields.selectionReason.set(__instance, AbstractDungeon.handCardSelectScreen.selectionReason);
+        }
+    }
     @SpirePatch(clz = HandSelectScreenState.class, method = "loadHandSelectScreenState")
     public static class LoadHandSelectScreenStatePatch {
         @SpirePrefixPatch
         public static void prep(HandSelectScreenState __instance) {
             AbstractDungeon.handCardSelectScreen.upgradePreviewCard = null;
-            AbstractDungeon.handCardSelectScreen.hoveredCard = null;
             ReflectionHacks.privateMethod(HandCardSelectScreen.class, "prep").invoke(AbstractDungeon.handCardSelectScreen);
+        }
+
+        @SpirePostfixPatch
+        public static void post(HandSelectScreenState __instance) {
+            AbstractDungeon.handCardSelectScreen.selectionReason = HandExtraFields.selectionReason.get(__instance);
+            ReflectionHacks.privateMethod(HandCardSelectScreen.class, "updateMessage").invoke(AbstractDungeon.handCardSelectScreen);
+        }
+    }
+
+    @SpirePatch(clz = GridCardSelectScreenState.class, method = SpirePatch.CLASS)
+    public static class GridExtraFields {
+        public static SpireField<String> tipMsg = new SpireField<>(() -> null);
+    }
+
+    @SpirePatch(clz = GridCardSelectScreenState.class, method = SpirePatch.CONSTRUCTOR)
+    public static class GridConstructorPatch {
+        @SpirePostfixPatch
+        public static void setTipMsg(GridCardSelectScreenState __instance) {
+            GridExtraFields.tipMsg.set(__instance, ReflectionHacks.getPrivate(AbstractDungeon.gridSelectScreen, GridCardSelectScreen.class, "tipMsg"));
+        }
+    }
+
+    @SpirePatch(clz = GridCardSelectScreenState.class, method = "loadGridSelectScreen")
+    public static class LoadGridSelectScreenStatePatch {
+        @SpirePrefixPatch
+        public static void prep(GridCardSelectScreenState __instance) {
+            AbstractDungeon.gridSelectScreen.upgradePreviewCard = null;
+            ReflectionHacks.privateMethod(GridCardSelectScreen.class, "callOnOpen").invoke(AbstractDungeon.gridSelectScreen);
+        }
+
+        @SpirePostfixPatch
+        public static void post(GridCardSelectScreenState __instance) {
+            GridCardSelectScreen screen = AbstractDungeon.gridSelectScreen;
+            ReflectionHacks.setPrivate(screen, GridCardSelectScreen.class, "tipMsg", GridExtraFields.tipMsg.get(__instance));
+            screen.peekButton.hideInstantly();
+            screen.peekButton.show();
+            ReflectionHacks.setPrivate(screen.peekButton, PeekButton.class, "current_x", ReflectionHacks.getPrivate(screen.peekButton, PeekButton.class, "target_x"));
+            ReflectionHacks.privateMethod(GridCardSelectScreen.class, "calculateScrollBounds").invoke(screen);
         }
     }
 }

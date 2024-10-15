@@ -21,8 +21,10 @@ import savestate.CreatureState;
 import savestate.PlayerState;
 import savestate.SaveState;
 import savestate.powers.powerstates.monsters.BackAttackPowerState;
+import savestate.selectscreen.GridCardSelectScreenState;
 import savestate.selectscreen.HandSelectScreenState;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
@@ -74,14 +76,23 @@ public class GameState {
         // Handle hand selection screen
         switch ((AbstractDungeon.CurrentScreen) ReflectionHacks.getPrivate(saveState, SaveState.class, "screen")) {
             case HAND_SELECT:
-                HandSelectScreenState screen = ReflectionHacks.getPrivate(saveState, SaveState.class, "handSelectScreenState");
-                CardState[] selectedCards = ReflectionHacks.getPrivate(screen, HandSelectScreenState.class, "selectedCards");
+                HandSelectScreenState handScreen = ReflectionHacks.getPrivate(saveState, SaveState.class, "handSelectScreenState");
+                CardState[] selectedCards = ReflectionHacks.getPrivate(handScreen, HandSelectScreenState.class, "selectedCards");
                 CardState[] hand = saveState.playerState.hand;
                 CardState[] newHand = new CardState[hand.length + selectedCards.length];
                 System.arraycopy(hand, 0, newHand, 0, hand.length);
                 System.arraycopy(selectedCards, 0, newHand, hand.length, selectedCards.length);
                 ReflectionHacks.setPrivateFinal(saveState.playerState, PlayerState.class, "hand", newHand);
-                ReflectionHacks.setPrivate(screen, HandSelectScreenState.class, "selectedCards", new CardState[0]);
+                ReflectionHacks.setPrivate(handScreen, HandSelectScreenState.class, "selectedCards", new CardState[0]);
+                ReflectionHacks.setPrivate(handScreen, HandSelectScreenState.class, "numSelected", 0);
+                ReflectionHacks.setPrivate(handScreen, HandSelectScreenState.class, "isDisabled", ReflectionHacks.getPrivate(handScreen, HandSelectScreenState.class, "canPickZero"));
+                break;
+            case GRID:
+                GridCardSelectScreenState gridScreen = ReflectionHacks.getPrivate(saveState, SaveState.class, "gridCardSelectScreenState");
+                ReflectionHacks.setPrivate(gridScreen, GridCardSelectScreenState.class, "selectedCards", new ArrayList<>());
+                ReflectionHacks.setPrivate(gridScreen, GridCardSelectScreenState.class, "cardSelectAmount", 0);
+                ReflectionHacks.setPrivate(gridScreen, GridCardSelectScreenState.class, "isConfirmButtonDisabled", ReflectionHacks.getPrivate(gridScreen, GridCardSelectScreenState.class, "anyNumber"));
+                ReflectionHacks.setPrivate(saveState, SaveState.class, "gridSelectedCards", new ArrayList<>());
                 break;
         }
     }

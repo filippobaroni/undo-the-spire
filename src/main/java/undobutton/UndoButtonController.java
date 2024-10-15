@@ -40,6 +40,7 @@ public class UndoButtonController {
         if (AbstractDungeon.isScreenUp) {
             switch (AbstractDungeon.screen) {
                 case HAND_SELECT:
+                case GRID:
                     return true;
                 default:
                     return false;
