@@ -45,6 +45,7 @@ public class ScreensPatches {
             HandExtraFields.selectionReason.set(__instance, AbstractDungeon.handCardSelectScreen.selectionReason);
         }
     }
+
     @SpirePatch(clz = HandSelectScreenState.class, method = "loadHandSelectScreenState")
     public static class LoadHandSelectScreenStatePatch {
         @SpirePrefixPatch
@@ -89,6 +90,10 @@ public class ScreensPatches {
             screen.peekButton.show();
             ReflectionHacks.setPrivate(screen.peekButton, PeekButton.class, "current_x", ReflectionHacks.getPrivate(screen.peekButton, PeekButton.class, "target_x"));
             ReflectionHacks.privateMethod(GridCardSelectScreen.class, "calculateScrollBounds").invoke(screen);
+            screen.targetGroup.group.forEach(c -> {
+                c.current_x = c.target_x;
+                c.current_y = c.target_y;
+            });
         }
     }
 }
