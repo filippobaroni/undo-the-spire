@@ -7,9 +7,11 @@ import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePrefixPatch;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
+import com.megacrit.cardcrawl.screens.CardRewardScreen;
 import com.megacrit.cardcrawl.screens.select.GridCardSelectScreen;
 import com.megacrit.cardcrawl.screens.select.HandCardSelectScreen;
 import com.megacrit.cardcrawl.ui.buttons.PeekButton;
+import savestate.selectscreen.CardRewardScreenState;
 import savestate.selectscreen.GridCardSelectScreenState;
 import savestate.selectscreen.HandSelectScreenState;
 import undobutton.GameState;
@@ -25,6 +27,7 @@ public class ScreensPatches {
                 switch (AbstractDungeon.screen) {
                     case HAND_SELECT:
                     case GRID:
+                    case CARD_REWARD:
                         UndoButtonMod.controller.addState(new GameState.Action(GameState.ActionType.CARD_SELECTED));
                         UndoButtonMod.logger.info("Added new state before selecting cards.");
                         break;
@@ -94,6 +97,29 @@ public class ScreensPatches {
                 c.current_x = c.target_x;
                 c.current_y = c.target_y;
             });
+        }
+    }
+
+    @SpirePatch(clz = CardRewardScreenState.class, method = SpirePatch.CLASS)
+    public static class CardRewardExtraFields {
+        public static SpireField<String> header = new SpireField<>(() -> null);
+    }
+
+    @SpirePatch(clz = CardRewardScreenState.class, method = SpirePatch.CONSTRUCTOR)
+    public static class CardRewardConstructorPatch {
+        @SpirePostfixPatch
+        public static void setHeader(CardRewardScreenState __instance) {
+            CardRewardExtraFields.header.set(__instance, ReflectionHacks.getPrivate(AbstractDungeon.cardRewardScreen, CardRewardScreen.class, "header"));
+        }
+    }
+
+    @SpirePatch(clz = CardRewardScreenState.class, method = "loadCardRewardScreen")
+    public static class LoadCardRewardScreenStatePatch {
+        @SpirePostfixPatch
+        public static void post(CardRewardScreenState __instance) {
+            ReflectionHacks.setPrivate(AbstractDungeon.cardRewardScreen, CardRewardScreen.class, "header", CardRewardExtraFields.header.get(__instance));
+            AbstractDungeon.cardRewardScreen.reopen();
+            AbstractDungeon.overlayMenu.showBlackScreen();
         }
     }
 }

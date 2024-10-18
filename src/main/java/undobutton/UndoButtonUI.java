@@ -59,6 +59,7 @@ public class UndoButtonUI {
                 switch (AbstractDungeon.screen) {
                     case HAND_SELECT:
                     case GRID:
+                    case CARD_REWARD:
                         isVisibleAboveScreen = true;
                         break;
                 }

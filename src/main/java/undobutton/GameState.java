@@ -17,7 +17,9 @@ import com.megacrit.cardcrawl.relics.AbstractRelic;
 import com.megacrit.cardcrawl.relics.BottledFlame;
 import com.megacrit.cardcrawl.relics.BottledLightning;
 import com.megacrit.cardcrawl.relics.BottledTornado;
+import com.megacrit.cardcrawl.ui.buttons.DynamicBanner;
 import com.megacrit.cardcrawl.ui.panels.PotionPopUp;
+import com.megacrit.cardcrawl.vfx.TintEffect;
 import savestate.CardState;
 import savestate.CreatureState;
 import savestate.PlayerState;
@@ -95,6 +97,8 @@ public class GameState {
                 ReflectionHacks.setPrivate(gridScreen, GridCardSelectScreenState.class, "cardSelectAmount", 0);
                 ReflectionHacks.setPrivate(gridScreen, GridCardSelectScreenState.class, "isConfirmButtonDisabled", ReflectionHacks.getPrivate(gridScreen, GridCardSelectScreenState.class, "anyNumber"));
                 ReflectionHacks.setPrivate(saveState, SaveState.class, "gridSelectedCards", new ArrayList<>());
+                break;
+            case CARD_REWARD:
                 break;
         }
     }
@@ -201,14 +205,22 @@ public class GameState {
     }
 
     public void fixScreens() {
+        // No black screen animation
         ((Color) ReflectionHacks.getPrivate(AbstractDungeon.overlayMenu, OverlayMenu.class, "blackScreenColor")).a = ReflectionHacks.getPrivate(AbstractDungeon.overlayMenu, OverlayMenu.class, "blackScreenTarget");
+        // No banner animation
+        if (AbstractDungeon.dynamicBanner.show) {
+            DynamicBanner banner = AbstractDungeon.dynamicBanner;
+            banner.appearInstantly(ReflectionHacks.getPrivate(banner, DynamicBanner.class, "label"));
+            Consumer<TintEffect> setToTarget = t -> {
+                t.color = ((Color) ReflectionHacks.getPrivate(t, TintEffect.class, "targetColor")).cpy();
+            };
+            setToTarget.accept(ReflectionHacks.getPrivate(banner, DynamicBanner.class, "tint"));
+            setToTarget.accept(ReflectionHacks.getPrivate(banner, DynamicBanner.class, "textTint"));
+        }
     }
 
     public enum ActionType {
-        CARD_PLAYED,
-        POTION_USED,
-        CARD_SELECTED,
-        TURN_ENDED
+        CARD_PLAYED, POTION_USED, CARD_SELECTED, TURN_ENDED
     }
 
     public static class Action {

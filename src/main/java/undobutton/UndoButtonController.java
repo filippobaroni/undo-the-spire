@@ -40,6 +40,7 @@ public class UndoButtonController {
             switch (AbstractDungeon.screen) {
                 case HAND_SELECT:
                 case GRID:
+                case CARD_REWARD:
                     return true;
                 default:
                     return false;
