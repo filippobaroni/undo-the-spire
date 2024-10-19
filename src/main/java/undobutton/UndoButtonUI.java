@@ -168,6 +168,7 @@ public class UndoButtonUI {
 
         protected void onClick() {
             CardCrawlGame.sound.play("UI_CLICK_1");
+            InputHelper.justClickedLeft = false;
         }
 
         protected abstract InputAction getInputAction();
