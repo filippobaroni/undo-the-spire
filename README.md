@@ -127,16 +127,28 @@ in the future).
 
 ## Troubleshooting
 
-**If the game crashes at startup or whenever you perform or undo an action**.
+**If the game crashes at startup or whenever you perform or undo an action**
 
 - Make sure that you've selected all the required dependencies for **Undo the Spire** in the ModTheSpire launcher.
 
-**If you don't see undo/redo buttons in combat.**
+**If you don't see undo/redo buttons in combat**
 
 - Make sure you're playing the game with mods (there should be a faint text in the bottom left or top right corner
   saying "ModTheSpire" amongst other things).
 - Make sure you've selected **Undo the Spire** in the ModTheSpire launcher.
   To verify this, click on "Mods" in the main menu and check that "Undo the Spire" appears in the list on the left.
+
+**If you experience performance issues**
+
+- **Undo the Spire** shouldn't affect performance too much, if you have other mods installed try and disable them first
+  to see if the issue persists.
+- In certain scenarios &ndash; for instance, a Donu and Deca fight lasting hundreds of turns &ndash; the Exhaust Pile
+  can grow significantly.
+  If you've exhausted over 1,000 cards in a single combat, creating a new undo state may become resource-intensive,
+  depending on your hardware.
+  If you anticipate this situation (e.g., your deck relies on an infinite combo), consider reducing the maximum number
+  of undos in the mod settings.
+  You can adjust these under: *Main menu → Mods → Undo the Spire → Config*.
 
 If the steps listed above do not solve your issue, it's possible you've encountered a bug!
 Please follow the steps in [the section below](#reporting-bugs-and-feature-requests) (or join
