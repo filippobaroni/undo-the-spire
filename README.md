@@ -10,7 +10,7 @@
 </p>
 
 
-<p align="center"><img style="width:80%" src="media/trailer.gif"/></p>
+<p align="center"><img style="width:80%" src="media/trailer.gif" alt="Loading clip..."/></p>
 
 **Undo the Spire** is a *Slay the Spire* mod that adds a button to undo your actions in combat.
 
