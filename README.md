@@ -1,6 +1,6 @@
 # Undo the Spire
 
-<p align="center">
+<p style="text-align:center">
 <a href="">
 <img src="https://img.shields.io/badge/Install from Steam-000?logo=Steam&logoColor=white" alt="Install from steam" /></a>
 <a href="https://discord.gg/TnxTeAw6S5">
@@ -180,7 +180,7 @@ While compatibility can’t always be guaranteed, I aim to make **Undo the Spire
 **Go the extra mile**<br/>
 If you really love **Undo the Spire** and want to support its development, you could
 
-<p align="center"><a href='https://ko-fi.com/Q5Q314YFIG' target='_blank'><img height='36' style='border:0px;height:36px' src='media/support-me.png' border='0' alt='Buy me a shop relic' /></a></p>
+<p style="text-align:center"><a href='https://ko-fi.com/Q5Q314YFIG' target='_blank'><img style='border:none;height:36px' src='media/support-me.png' alt='Buy me a shop relic' /></a></p>
 
 It will make my day!
 
