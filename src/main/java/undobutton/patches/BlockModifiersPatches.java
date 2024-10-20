@@ -13,12 +13,12 @@ import java.util.stream.Collectors;
 
 public class BlockModifiersPatches {
 
-    @SpirePatch(clz = CreatureState.class, method = SpirePatch.CLASS)
+    @SpirePatch(requiredModId = "stslib", clz = CreatureState.class, method = SpirePatch.CLASS)
     public static class CreatureStateExtraFields {
         public static SpireField<ArrayList<BlockInstanceState>> blockInstances = new SpireField<>(ArrayList::new);
     }
 
-    @SpirePatch(clz = CreatureState.class, method = SpirePatch.CONSTRUCTOR, paramtypez = {AbstractCreature.class})
+    @SpirePatch(requiredModId = "stslib", clz = CreatureState.class, method = SpirePatch.CONSTRUCTOR, paramtypez = {AbstractCreature.class})
     public static class CreatureStateConstructorPatch {
         @SpirePostfixPatch
         public static void saveBlockInstances(CreatureState __instance, AbstractCreature creature) {
@@ -26,7 +26,7 @@ public class BlockModifiersPatches {
         }
     }
 
-    @SpirePatch(clz = CreatureState.class, method = "loadCreature")
+    @SpirePatch(requiredModId = "stslib", clz = CreatureState.class, method = "loadCreature")
     public static class CreatureStateLoadPatch {
         @SpirePostfixPatch
         public static void loadBlockInstances(CreatureState __instance, AbstractCreature creature) {
