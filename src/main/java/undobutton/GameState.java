@@ -35,9 +35,14 @@ import java.util.function.Consumer;
 public class GameState {
     public static Class<?>[] extraStateTypes;
     public static Class<?>[] extraStateHandlers;
+    private final static ArrayList<Runnable> postLoadRunners = new ArrayList<>();
     public final SaveState saveState;
     public final Object[] extraState;
     public Action lastAction;
+
+    public static void addPostLoadRunner(Runnable runner) {
+        postLoadRunners.add(runner);
+    }
 
     public GameState(Action action) {
         lastAction = action;
@@ -121,6 +126,9 @@ public class GameState {
                 throw new RuntimeException(e);
             }
         }
+        // Run post-load runners
+        postLoadRunners.forEach(Runnable::run);
+        postLoadRunners.clear();
         // Fix screens
         fixScreens();
         // Set isPlayerFlippedHorizontally
