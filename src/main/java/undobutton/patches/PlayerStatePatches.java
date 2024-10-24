@@ -1,7 +1,11 @@
 package undobutton.patches;
 
+import basemod.ReflectionHacks;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInstrumentPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
+import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
+import com.megacrit.cardcrawl.characters.AbstractPlayer;
+import com.megacrit.cardcrawl.core.AbstractCreature;
 import com.megacrit.cardcrawl.ui.panels.EnergyPanel;
 import javassist.CannotCompileException;
 import javassist.expr.ExprEditor;
@@ -24,6 +28,15 @@ public class PlayerStatePatches {
                     }
                 }
             };
+        }
+
+        // Set the health bar to the correct width
+        @SpirePostfixPatch
+        public static AbstractPlayer updateHealthBar(AbstractPlayer __result, PlayerState __instance) {
+            __result.healthBarUpdatedEvent();
+            ReflectionHacks.setPrivate(__result, AbstractCreature.class, "healthBarWidth", ReflectionHacks.getPrivate(__result, AbstractCreature.class, "targetHealthBarWidth"));
+            ReflectionHacks.setPrivate(__result, AbstractCreature.class, "healthBarAnimTimer", 0.0F);
+            return __result;
         }
     }
 }
