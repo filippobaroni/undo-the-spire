@@ -36,7 +36,7 @@ public class ReptomancerPatches {
     public static class LoadPatch {
         @SpirePostfixPatch
         public static AbstractMonster addLoadDaggersAction(AbstractMonster __result, ReptomancerState __instance) {
-            GameState.addPostLoadRunner(() -> {
+            GameState.addPostLoadRunner((info) -> {
                 AbstractMonster[] daggers = ReflectionHacks.getPrivate(__result, Reptomancer.class, "daggers");
                 for (int i = 0; i < 4; i++) {
                     if (ExtraFields.daggers.get(__instance)[i] != null) {

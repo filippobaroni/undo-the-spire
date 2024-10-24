@@ -38,7 +38,7 @@ public class TheCollectorPatches {
     public static class LoadPatch {
         @SpirePostfixPatch
         public static AbstractMonster addLoadMinionsAction(AbstractMonster __result, TheCollectorState __instance) {
-            GameState.addPostLoadRunner(() -> {
+            GameState.addPostLoadRunner((info) -> {
                 HashMap<Integer, AbstractMonster> enemySlots = ReflectionHacks.getPrivate(__result, TheCollector.class, "enemySlots");
                 enemySlots.clear();
                 for (int i = 1; i <= 2; i++) {

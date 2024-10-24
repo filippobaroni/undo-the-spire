@@ -36,7 +36,7 @@ public class GremlinLeaderPatches {
     public static class LoadPatch {
         @SpirePostfixPatch
         public static AbstractMonster addLoadGremlinsRunner(AbstractMonster __result, GremlinLeaderState __instance) {
-            GameState.addPostLoadRunner(() -> {
+            GameState.addPostLoadRunner((info) -> {
                 for (int i = 0; i < 3; i++) {
                     if (ExtraFields.gremlins.get(__instance)[i] != null) {
                         UUID uuid = ExtraFields.gremlins.get(__instance)[i];
