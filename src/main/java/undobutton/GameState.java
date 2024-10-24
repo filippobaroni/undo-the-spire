@@ -3,6 +3,7 @@ package undobutton;
 import basemod.ReflectionHacks;
 import com.badlogic.gdx.graphics.Color;
 import com.megacrit.cardcrawl.cards.AbstractCard;
+import com.megacrit.cardcrawl.cards.CardGroup;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.core.AbstractCreature;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
@@ -27,20 +28,23 @@ import savestate.SaveState;
 import savestate.powers.powerstates.monsters.BackAttackPowerState;
 import savestate.selectscreen.GridCardSelectScreenState;
 import savestate.selectscreen.HandSelectScreenState;
+import undobutton.patches.AbstractCardPatches;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public class GameState {
     public static Class<?>[] extraStateTypes;
     public static Class<?>[] extraStateHandlers;
-    private final static ArrayList<Runnable> postLoadRunners = new ArrayList<>();
+    private final static ArrayList<Consumer<PostLoadInfo>> postLoadRunners = new ArrayList<>();
     public final SaveState saveState;
     public final Object[] extraState;
     public Action lastAction;
 
-    public static void addPostLoadRunner(Runnable runner) {
+    public static void addPostLoadRunner(Consumer<PostLoadInfo> runner) {
         postLoadRunners.add(runner);
     }
 
@@ -127,7 +131,8 @@ public class GameState {
             }
         }
         // Run post-load runners
-        postLoadRunners.forEach(Runnable::run);
+        PostLoadInfo info = new PostLoadInfo();
+        postLoadRunners.forEach(r -> r.accept(info));
         postLoadRunners.clear();
         // Fix screens
         fixScreens();
@@ -135,8 +140,6 @@ public class GameState {
         UndoButtonMod.controller.isPlayerFlippedHorizontally = ReflectionHacks.getPrivate(saveState.playerState, CreatureState.class, "flipHorizontal");
         // Fix bottle relics
         fixBottleRelic();
-        // Empty card queue
-        AbstractDungeon.actionManager.cardQueue.clear();
         // Reset glowing of end turn button
         AbstractDungeon.overlayMenu.endTurnButton.isGlowing = !AbstractDungeon.player.hand.canUseAnyCard();
         // Reset glowing of cards in hand
@@ -294,6 +297,25 @@ public class GameState {
                 default:
                     return "UNKNOWN ACTION TYPE";
             }
+        }
+    }
+
+    public class PostLoadInfo {
+        public HashMap<UUID, AbstractCard> allCards;
+
+        public PostLoadInfo() {
+            allCards = new HashMap<>();
+            Consumer<CardGroup> addCards = cards -> cards.group.forEach(c -> allCards.put(AbstractCardPatches.ExtraFields.trulyUniqueUuid.get(c), c));
+            addCards.accept(AbstractDungeon.player.drawPile);
+            addCards.accept(AbstractDungeon.player.discardPile);
+            addCards.accept(AbstractDungeon.player.exhaustPile);
+            addCards.accept(AbstractDungeon.player.hand);
+            addCards.accept(AbstractDungeon.player.limbo);
+            addCards.accept(AbstractDungeon.player.masterDeck);
+        }
+
+        public AbstractCard getAbstractCard(AbstractCard card) {
+            return allCards.get(AbstractCardPatches.ExtraFields.trulyUniqueUuid.get(card));
         }
     }
 }

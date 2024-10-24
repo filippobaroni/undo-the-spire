@@ -7,6 +7,8 @@ import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import savestate.CardState;
 
+import java.util.UUID;
+
 public class CardStatePatches {
     @SpirePatch(clz = CardState.class, method = SpirePatch.CLASS)
     public static class ExtraFields {
@@ -14,6 +16,7 @@ public class CardStatePatches {
         public static SpireField<String> description = new SpireField<>(() -> null);
         public static SpireField<Float> target_x = new SpireField<>(() -> 0.0F);
         public static SpireField<Float> target_y = new SpireField<>(() -> 0.0F);
+        public static SpireField<UUID> trulyUniqueUuid = new SpireField<>(() -> null);
     }
 
     @SpirePatch(clz = CardState.class, method = SpirePatch.CONSTRUCTOR, paramtypez = {AbstractCard.class})
@@ -24,6 +27,7 @@ public class CardStatePatches {
             ExtraFields.description.set(__instance, card.rawDescription);
             ExtraFields.target_x.set(__instance, card.target_x);
             ExtraFields.target_y.set(__instance, card.target_y);
+            ExtraFields.trulyUniqueUuid.set(__instance, AbstractCardPatches.ExtraFields.trulyUniqueUuid.get(card));
         }
     }
 
@@ -38,6 +42,7 @@ public class CardStatePatches {
             __result.target_y = ExtraFields.target_y.get(__instance);
             __result.current_x = __result.target_x;
             __result.current_y = __result.target_y;
+            AbstractCardPatches.ExtraFields.trulyUniqueUuid.set(__result, ExtraFields.trulyUniqueUuid.get(__instance));
             return __result;
         }
     }
