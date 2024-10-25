@@ -104,7 +104,7 @@ public class GameState {
                 GridCardSelectScreenState gridScreen = ReflectionHacks.getPrivate(saveState, SaveState.class, "gridCardSelectScreenState");
                 ReflectionHacks.setPrivate(gridScreen, GridCardSelectScreenState.class, "selectedCards", new ArrayList<>());
                 ReflectionHacks.setPrivate(gridScreen, GridCardSelectScreenState.class, "cardSelectAmount", 0);
-                ReflectionHacks.setPrivate(gridScreen, GridCardSelectScreenState.class, "isConfirmButtonDisabled", ReflectionHacks.getPrivate(gridScreen, GridCardSelectScreenState.class, "anyNumber"));
+                ReflectionHacks.setPrivate(gridScreen, GridCardSelectScreenState.class, "isConfirmButtonDisabled", !((boolean) ReflectionHacks.getPrivate(gridScreen, GridCardSelectScreenState.class, "anyNumber")));
                 ReflectionHacks.setPrivate(saveState, SaveState.class, "gridSelectedCards", new ArrayList<>());
                 break;
             case CARD_REWARD:

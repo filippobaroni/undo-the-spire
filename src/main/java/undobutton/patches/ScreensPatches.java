@@ -10,6 +10,7 @@ import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import com.megacrit.cardcrawl.screens.CardRewardScreen;
 import com.megacrit.cardcrawl.screens.select.GridCardSelectScreen;
 import com.megacrit.cardcrawl.screens.select.HandCardSelectScreen;
+import com.megacrit.cardcrawl.ui.buttons.GridSelectConfirmButton;
 import com.megacrit.cardcrawl.ui.buttons.PeekButton;
 import savestate.selectscreen.CardRewardScreenState;
 import savestate.selectscreen.GridCardSelectScreenState;
@@ -92,7 +93,13 @@ public class ScreensPatches {
             screen.peekButton.hideInstantly();
             screen.peekButton.show();
             ReflectionHacks.setPrivate(screen.peekButton, PeekButton.class, "current_x", ReflectionHacks.getPrivate(screen.peekButton, PeekButton.class, "target_x"));
+            screen.confirmButton.hideInstantly();
+            if (!screen.confirmButton.isDisabled) {
+                screen.confirmButton.show();
+                ReflectionHacks.setPrivate(screen.confirmButton, GridSelectConfirmButton.class, "current_x", ReflectionHacks.getPrivate(screen.confirmButton, GridSelectConfirmButton.class, "target_x"));
+            }
             ReflectionHacks.privateMethod(GridCardSelectScreen.class, "calculateScrollBounds").invoke(screen);
+            ReflectionHacks.privateMethod(GridCardSelectScreen.class, "updateCardPositionsAndHoverLogic").invoke(screen);
             screen.targetGroup.group.forEach(c -> {
                 c.current_x = c.target_x;
                 c.current_y = c.target_y;
