@@ -1,0 +1,27 @@
+{
+  "${modID}:Card Action": {
+    "TEXT": [
+      "gioca "
+    ]
+  },
+  "${modID}:Potion Action": {
+    "TEXT": [
+      "usa "
+    ]
+  },
+  "${modID}:End Turn Action": {
+    "TEXT": [
+      "fine turno"
+    ]
+  },
+  "${modID}:Select Cards Action": {
+    "TEXT": [
+      "scegli carte"
+    ]
+  },
+  "${modID}:Settings Num States": {
+    "TEXT": [
+      "Massimo numero di azioni annullate:"
+    ]
+  }
+}

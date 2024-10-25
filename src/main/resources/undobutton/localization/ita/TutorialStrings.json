@@ -1,0 +1,18 @@
+{
+  "${modID}:Undo Tip": {
+    "LABEL": [
+      "Annulla"
+    ],
+    "TEXT": [
+      "Annulla l'ultima azione"
+    ]
+  },
+  "${modID}:Redo Tip": {
+    "LABEL": [
+      "Ripeti"
+    ],
+    "TEXT": [
+      "Ripeti l'ultima azione annullata"
+    ]
+  }
+}
