@@ -1,0 +1,35 @@
+[url=https://discord.gg/TnxTeAw6S5]Join the Discord server![/url] | [url=https://ko-fi.com/Q5Q314YFIG]Buy me a shop relic![/url]
+
+[h1] Undo the Spire [/h1]
+[b]Undo the Spire[/b] is a [i]Slay the Spire[/i] mod that adds a button to undo your actions in combat.
+[list]
+[*] Played a block card before you realised you had lethal? [b]UNDO![/b]
+[*] Forgot you had Echo Form active and doubled a Strike instead of Biased Cognition? [b]UNDO![/b]
+[*] Lost your Buffer to the Heart's Beat of Death? [b]UNDO![/b]
+[/list]
+With so many interactions happening in the game, it's nearly impossible to be aware of everything at all times – unless you're [url=https://www.twitch.tv/xecnar]a certain Vietnamese player[/url], of course. Mistakes are inevitable, and it's especially frustrating when a tiny misplay has the potential to ruin your entire run. If you've ever experienced this – and ended up resorting to [strike]savescumming[/strike] accepting your fate and restarting, after your game decided to crash mid-fight – this mod is for you.
+
+[h2]What does it do?[/h2]
+[b]Undo the Spire[/b] literally only does one thing: add buttons to undo/redo your actions in combat.
+
+[h2]What does it not do?[/h2]
+[list]
+[*] Allow undoing outside of combat (yet!).
+[*] Work with controller (yet!).
+[*] Guarantee that you boss swap into Pandora's Box every time (yet!).
+[/list]
+
+[h2]Installation[/h2]
+[olist]
+[*] Click the "Subscribe" button, just below the screenshot at the top of this page.
+[*] If prompted "Additional Required Items", click "Subscribe to all"; this will install other mods that [b]Undo the Spire[/b] requires to function, namely ModTheSpire, BaseMod, StsLib, and Save State Mod.
+[*] Run [i]Slay the Spire[/i] from Steam, and select "Play With Mods" when prompted. If you don't see this prompt after you launch the game, open [i]Slay the Spire[/i]'s settings, and under [i]General → Launch options → Selected Launch Option[/i] pick "Play With Mods" (or "Ask when starting game" if you want to decide on a per-launch basis).
+[*] You should now see a window with a list of mods. Select BaseMod, StSLib, STS Save State Mod, and Undo the Spire, together with any other mods you want to use.
+[*] Click "Play".
+[/olist]
+If everything is set up correctly, you should now be able to play [i]Slay the Spire[/i] with [b]Undo the Spire[/b].
+
+[h2]But wait, there's more![/h2]
+If you want more information, including how to report bugs, suggest features, contribute to the development of [b]Undo the Spire[/b], or you want to read a short essay on why an undo button can be beneficial for your [i]Slay the Spire[/i] experience, read the [url=https://github.com/filippobaroni/undo-the-spire?tab=readme-ov-file#undo-the-spire]README of this project on GitHub[/url].
+If you have anything to say about [b]Undo the Spire[/b] and the comment section of Steam Workshop is too restrictive, feel free to hop in the [url=https://discord.gg/TnxTeAw6S5]Discord server[/url]!
+Finally, if you really enjoy this mod and want to go the extra mile, you can [url=https://ko-fi.com/Q5Q314YFIG]buy me a shop relic on Ko-fi[/url]. It will make my day!

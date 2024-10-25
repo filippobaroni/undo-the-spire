@@ -1,7 +1,9 @@
 # Undo the Spire
 
 <p align="center">
-<a href="">
+<a href="https://github.com/filippobaroni/undo-the-spire/releases/latest">
+<img alt="GitHub Tag" src="https://img.shields.io/github/v/release/filippobaroni/undo-the-spire" alt="GitHub release"></a>
+<a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3354673683">
 <img src="https://img.shields.io/badge/Install from Steam-000?logo=Steam&logoColor=white" alt="Install from steam" /></a>
 <a href="https://discord.gg/TnxTeAw6S5">
 <img src="https://img.shields.io/badge/Join the Discord server-5865F2?logo=Discord&logoColor=white" alt="Join the Discord server" /></a>
@@ -21,7 +23,7 @@
 With so many interactions happening in the game, it's nearly impossible to be aware of everything at all times &ndash;
 unless you're [a certain Vietnamese player](https://www.twitch.tv/xecnar), of course.
 Mistakes are inevitable, and it's especially frustrating when a tiny misplay has the potential to ruin your entire run.
-If you have ever experienced this &ndash; and ended up resorting to <s>savescumming</s> accepting your fate and
+If you've ever experienced this &ndash; and ended up resorting to <s>savescumming</s> accepting your fate and
 restarting, after your game decided to crash mid-fight &ndash; this mod is for you.
 
 
@@ -43,13 +45,17 @@ restarting, after your game decided to crash mid-fight &ndash; this mod is for y
 
 The easiest way to install **Undo the Spire** is via Steam Workshop.
 
-1. Open the [Undo the Spire Steam Workshop page].
+1. Open the [Undo the Spire Steam Workshop page][steam-undo-the-spire].
 2. Click "Subscribe".
-3. If prompted "Additional Required Items", click "Subscribe to all"; this will install other mods that **Undo the Spire** requires to function, namely [ModTheSpire][modthespire], [BaseMod][basemod], [StsLib][stslib], and [Save State Mod][savestatemod].
+3. If prompted "Additional Required Items", click "Subscribe to all"; this will install other mods that **Undo the Spire
+   ** requires to function, namely [ModTheSpire][modthespire], [BaseMod][basemod], [StSLib][stslib],
+   and [Save State Mod][savestatemod].
 4. Run *Slay the Spire* from Steam, and select "Play With Mods" when prompted.
-If you don't see this prompt after you launch the game, open *Slay the Spire*'s settings, and under *General → Launch options → Selected Launch Option* pick "Play With Mods" (or "Ask when starting game" if you want to decide on a per-launch basis).
+   If you don't see this prompt after you launch the game, open *Slay the Spire*'s Steam settings, and under *General →
+   Launch options → Selected Launch Option* pick "Play With Mods" (or "Ask when starting game" if you want to decide on
+   a per-launch basis).
 5. You should now see a window with a list of mods.
-Select BaseMod, StSLib, STS Save State Mod, and Undo the Spire, together with any other mods you want to use.
+   Select BaseMod, StSLib, Save State Mod, and Undo the Spire, together with any other mods you want to use.
 6. Click "Play".
 
 If everything is set up correctly, you should now be able to play *Slay the Spire* with **Undo the Spire**.
@@ -62,9 +68,13 @@ If you want to try a pre-release version of **Undo the Spire**, you can install 
 
 1. Open the *Slay the Spire* Steam Workshop and subscribe
    to [ModTheSpire][modthespire], [BaseMod][basemod], [StsLib][stslib], and [Save State Mod][savestatemod].
-2. Download your desired version of **Undo the Spire** from ??.
-3. TBC...
-
+2. Open the [releases](https://github.com/filippobaroni/undo-the-spire/releases) page of **Undo the Spire**, select your
+   desired version, open the "Assets" menu, and download the `undothespire.jar` file.
+3. Open your *Slay the Spire* local folder; this can be found in *Slay the Spire*'s Steam settings, under *Installed
+   Files → Browse...*.
+4. If not already present, create a folder called `mods`.
+5. Copy the `undothespire.jar` file you downloaded in the `mods` folder, overwriting the previous file if necessary.
+6. Follow steps 4., 5., and 6. from the Steam Workshop installation guide above.
 
 ## Compatibility
 
@@ -134,7 +144,17 @@ If you encounter anything that doesn't work as expected, please follow the guide
 in [the section below](#reporting-bugs-and-feature-requests) to report a bug (or just jump in
 the [Discord server][discord-general]!).
 
-**Help translating**<br/>
+**Beta-testing**<br/>
+Given the intrinsic complexity of *Slay the Spire*, there are almost endless possible combinations of cards, relics,
+enemies, and effects.
+Even thousands of hours of testing (which this mod definitely did not undergo) couldn't possibly cover every possible
+scenario.
+Nonetheless, more testing is always better.
+If you would like to become a beta-tester for **Undo the Spire**, and have access to the latest features while also
+helping make the mod more robust for other players, join the [Discord server][discord-general] and get started
+immediately!
+
+**Translation**<br/>
 Want to help bring **Undo the Spire** to players in other languages?
 The amount of text in the mod is minimal, so even a small contribution can make a big impact.
 If you're interested in translating the mod, feel free to reach out on the [Discord server][discord-general]!
@@ -262,3 +282,5 @@ In no particular order, I would like to thank all the people that made this proj
 [discord-announcements]: https://discord.gg/nEfh6gGNvH
 
 [discord-general]: https://discord.gg/TnxTeAw6S5
+
+[steam-undo-the-spire]: https://steamcommunity.com/sharedfiles/filedetails/?id=3354673683
