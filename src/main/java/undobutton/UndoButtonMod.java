@@ -70,7 +70,7 @@ public class UndoButtonMod implements EditStringsSubscriber, PostInitializeSubsc
         } catch (IOException e) {
             e.printStackTrace();
         }
-        controller = new UndoButtonController(logger);
+        controller = new UndoButtonController();
         ui = new UndoButtonUI();
         BaseMod.subscribe(this); //This will make BaseMod trigger all the subscribers at their appropriate times.
         logger.info("{} subscribed to BaseMod.", modID);

@@ -3,20 +3,15 @@ package undobutton;
 import com.megacrit.cardcrawl.actions.GameActionManager;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
-import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayDeque;
 
 public class UndoButtonController {
-    private final Logger logger;
     private final ArrayDeque<GameState> pastGameStates = new ArrayDeque<>();
     private final ArrayDeque<GameState> futureGameStates = new ArrayDeque<>();
     public boolean isThisEndTurnForced = false;
     public boolean isPlayerFlippedHorizontally = false;
 
-    public UndoButtonController(Logger logger) {
-        this.logger = logger;
-    }
 
     public void onStartBattle(AbstractRoom room) {
         clearStates();
@@ -62,16 +57,16 @@ public class UndoButtonController {
         // Remove the oldest state if queue is too long
         if (pastGameStates.size() > UndoButtonMod.getMaxStates()) {
             pastGameStates.removeLast();
-            logger.info("More than {} states in queue, removing oldest state.", UndoButtonMod.getMaxStates());
+            UndoButtonMod.logger.info("More than {} states in queue, removing oldest state.", UndoButtonMod.getMaxStates());
         }
     }
 
     public void undo() {
         if (pastGameStates.isEmpty()) {
-            logger.info("Undo queue is empty.");
+            UndoButtonMod.logger.info("Undo queue is empty.");
             return;
         }
-        logger.info("Undoing.");
+        UndoButtonMod.logger.info("Undoing.");
         GameState state = pastGameStates.removeFirst();
         futureGameStates.addFirst(new GameState(state.lastAction));
         state.apply();
@@ -79,10 +74,10 @@ public class UndoButtonController {
 
     public void redo() {
         if (futureGameStates.isEmpty()) {
-            logger.info("Redo queue is empty.");
+            UndoButtonMod.logger.info("Redo queue is empty.");
             return;
         }
-        logger.info("Redoing.");
+        UndoButtonMod.logger.info("Redoing.");
         GameState state = futureGameStates.removeFirst();
         pastGameStates.addFirst(new GameState(state.lastAction));
         state.apply();
@@ -91,7 +86,7 @@ public class UndoButtonController {
     public void clearStates() {
         pastGameStates.clear();
         futureGameStates.clear();
-        logger.info("Cleared undo/redo queue.");
+        UndoButtonMod.logger.info("Cleared undo/redo queue.");
     }
 
     public String getUndoActionString() {
