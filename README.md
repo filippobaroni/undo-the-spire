@@ -2,7 +2,7 @@
 
 <p align="center">
 <a href="https://github.com/filippobaroni/undo-the-spire/releases/latest">
-<img alt="GitHub Tag" src="https://img.shields.io/github/v/release/filippobaroni/undo-the-spire" alt="GitHub release"></a>
+<img alt="GitHub Tag" src="https://img.shields.io/github/v/tag/filippobaroni/undo-the-spire" alt="GitHub release"></a>
 <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3354673683">
 <img src="https://img.shields.io/badge/Install from Steam-000?logo=Steam&logoColor=white" alt="Install from steam" /></a>
 <a href="https://discord.gg/TnxTeAw6S5">
