@@ -126,6 +126,7 @@ public class ScreensPatches {
         public static void post(CardRewardScreenState __instance) {
             ReflectionHacks.setPrivate(AbstractDungeon.cardRewardScreen, CardRewardScreen.class, "header", CardRewardExtraFields.header.get(__instance));
             AbstractDungeon.cardRewardScreen.reopen();
+            AbstractDungeon.cardRewardScreen.discoveryCard = null;
             AbstractDungeon.overlayMenu.showBlackScreen();
         }
     }
