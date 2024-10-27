@@ -53,7 +53,11 @@ public class UndoButtonController {
         // Clear future states
         futureGameStates.clear();
         // Add new state
-        pastGameStates.addFirst(new GameState(action));
+        try {
+            pastGameStates.addFirst(new GameState(action));
+        } catch (Exception e) {
+            failedToAddState(e);
+        }
         // Remove the oldest state if queue is too long
         if (pastGameStates.size() > UndoButtonMod.getMaxStates()) {
             pastGameStates.removeLast();
@@ -68,7 +72,11 @@ public class UndoButtonController {
         }
         UndoButtonMod.logger.info("Undoing.");
         GameState state = pastGameStates.removeFirst();
-        futureGameStates.addFirst(new GameState(state.lastAction));
+        try {
+            futureGameStates.addFirst(new GameState(state.lastAction));
+        } catch (Exception e) {
+            failedToAddState(e);
+        }
         state.apply();
     }
 
@@ -101,6 +109,15 @@ public class UndoButtonController {
             return "";
         }
         return futureGameStates.getFirst().lastAction.toString();
+    }
+
+    public void failedToAddState(Exception e) {
+        if (UndoButtonMod.DEBUG) {
+            throw new RuntimeException("Failed to save the current state", e);
+        } else {
+            UndoButtonMod.logger.error("Failed to save the current state");
+            e.printStackTrace();
+        }
     }
 
 }
