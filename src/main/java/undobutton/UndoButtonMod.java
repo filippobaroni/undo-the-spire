@@ -45,7 +45,7 @@ import static java.lang.reflect.Modifier.isStatic;
 @SpireInitializer
 @SpireSideload(modIDs = {"SaveStateMod"})
 public class UndoButtonMod implements EditStringsSubscriber, PostInitializeSubscriber, OnStartBattleSubscriber, RenderSubscriber, PostUpdateSubscriber, PrePotionUseSubscriber {
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
 
     private static final String resourcesFolder = checkResourcesPath();
     private static final String defaultLanguage = "eng";
