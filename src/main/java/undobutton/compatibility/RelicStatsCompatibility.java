@@ -105,6 +105,9 @@ public class RelicStatsCompatibility {
                     pTypes[0] = Class.forName("relicstats." + statTrackerClassName);
                     for (int i = 1; i < fields.length; i++) {
                         pTypes[i] = fields[i].getClass();
+                        if (pTypes[i] == Integer.class) {
+                            pTypes[i] = int.class;
+                        }
                     }
                     return action.getClass().getConstructor(pTypes).newInstance(fields);
                 } catch (Exception e) {
