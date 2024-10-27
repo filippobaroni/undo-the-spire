@@ -4,7 +4,6 @@ import basemod.ReflectionHacks;
 import com.evacipated.cardcrawl.modthespire.lib.SpireField;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
-import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import com.megacrit.cardcrawl.monsters.beyond.Reptomancer;
 import savestate.monsters.beyond.ReptomancerState;
@@ -41,7 +40,7 @@ public class ReptomancerPatches {
                 for (int i = 0; i < 4; i++) {
                     if (ExtraFields.daggers.get(__instance)[i] != null) {
                         UUID uuid = ExtraFields.daggers.get(__instance)[i];
-                        daggers[i] = AbstractDungeon.getMonsters().monsters.stream().filter(m -> AbstractCreaturePatches.ExtraFields.uuid.get(m).equals(uuid)).findFirst().get();
+                        daggers[i] = AbstractCreaturePatches.getMonsterFromUUID(uuid);
                     }
                 }
             });

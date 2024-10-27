@@ -3,7 +3,6 @@ package undobutton.patches.monsters;
 import com.evacipated.cardcrawl.modthespire.lib.SpireField;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
-import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import com.megacrit.cardcrawl.monsters.city.GremlinLeader;
 import savestate.monsters.city.GremlinLeaderState;
@@ -40,7 +39,7 @@ public class GremlinLeaderPatches {
                 for (int i = 0; i < 3; i++) {
                     if (ExtraFields.gremlins.get(__instance)[i] != null) {
                         UUID uuid = ExtraFields.gremlins.get(__instance)[i];
-                        ((GremlinLeader) __result).gremlins[i] = AbstractDungeon.getMonsters().monsters.stream().filter(m -> AbstractCreaturePatches.ExtraFields.uuid.get(m).equals(uuid)).findFirst().get();
+                        ((GremlinLeader) __result).gremlins[i] = AbstractCreaturePatches.getMonsterFromUUID(uuid);
                     }
                 }
             });

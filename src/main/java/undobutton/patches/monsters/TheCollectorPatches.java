@@ -4,7 +4,6 @@ import basemod.ReflectionHacks;
 import com.evacipated.cardcrawl.modthespire.lib.SpireField;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
-import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import com.megacrit.cardcrawl.monsters.city.TheCollector;
 import savestate.monsters.city.TheCollectorState;
@@ -44,7 +43,7 @@ public class TheCollectorPatches {
                 for (int i = 1; i <= 2; i++) {
                     if (ExtraFields.enemySlots.get(__instance).containsKey(i)) {
                         UUID uuid = ExtraFields.enemySlots.get(__instance).get(i);
-                        enemySlots.put(i, AbstractDungeon.getMonsters().monsters.stream().filter(m -> AbstractCreaturePatches.ExtraFields.uuid.get(m).equals(uuid)).findFirst().get());
+                        enemySlots.put(i, AbstractCreaturePatches.getMonsterFromUUID(uuid));
                     }
                 }
             });

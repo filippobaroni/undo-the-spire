@@ -74,6 +74,13 @@
             <scope>system</scope>
             <systemPath>${steam.path}/workshop/content/646570/2489671162/SaveStateMod.jar</systemPath>
         </dependency>
+        <dependency>
+            <groupId>RelicStats</groupId>
+            <artifactId>RelicStats</artifactId>
+            <version>1.2.2</version>
+            <scope>system</scope>
+            <systemPath>${steam.path}/workshop/content/646570/2118491069/RelicStats.jar</systemPath>
+        </dependency>
     </dependencies>
 
 

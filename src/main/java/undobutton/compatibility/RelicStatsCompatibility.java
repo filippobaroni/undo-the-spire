@@ -6,11 +6,20 @@ import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
 import com.google.gson.JsonElement;
 import com.megacrit.cardcrawl.actions.AbstractGameAction;
+import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import relicstats.AmountAdjustmentCallback;
+import relicstats.AmountIncreaseCallback;
+import relicstats.actions.*;
 import savestate.StateFactories;
 import savestate.actions.ActionState;
+import undobutton.patches.AbstractCreaturePatches;
 import undobutton.util.MakeUndoable;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @MakeUndoable(statetype = JsonElement.class)
 public class RelicStatsCompatibility {
@@ -38,29 +47,75 @@ public class RelicStatsCompatibility {
     }
 
     public enum ExtraActions {
-        // Not doing AoeDamageActions, might come back to bite me.
-        DRAW_FOLLOWUP_ACTION("CardDrawFollowupAction", makeRelicStatsFactory("AmountAdjustmentCallback", "CardDrawFollowupAction")),
-        HEALING_FOLLOWUP_ACTION("HealingFollowupAction", makeRelicStatsFactory("AmountAdjustmentCallback", "HealingFollowupAction")),
-        ORANGE_PELLETS_FOLLOWUP_ACTION("OrangePelletsFollowupAction", makeRelicStatsFactory("AmountAdjustmentCallback", "OrangePelletsFollowupAction")),
-        PRE_DRAW_ACTION("PreCardDrawAction", makeRelicStatsFactory("AmountAdjustmentCallback", "PreAmountAdjustmentAction")),
-        PRE_GOLDEN_EYE_SCRY_ACTION("PreGoldenEyeScryAction", makeRelicStatsFactory("AmountAdjustmentCallback", "PreAmountAdjustmentAction", "baseScry")),
-        PRE_HEALING_ACTION("PreHealingAction", makeRelicStatsFactory("AmountAdjustmentCallback", "PreAmountAdjustmentAction")),
-        PRE_ORANGE_PELLETS_ACTION("PreOrangePelletsAction", makeRelicStatsFactory("AmountAdjustmentCallback", "PreAmountAdjustmentAction")),
-        PRE_SCRY_ACTION("PreScryAction", makeRelicStatsFactory("AmountAdjustmentCallback", "PreAmountAdjustmentAction")),
-        WARPED_TONGS_FOLLOWUP_ACTION("WarpedTongsFollowupAction", new ActionState.ActionFactories(action -> () -> {
-            try {
-                return (AbstractGameAction) Class.forName("relicstats.actions.WarpedTongsFollowupAction").newInstance();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }));
+        AOE_DAMAGE_FOLLOWUP_ACTION(AoeDamageFollowupAction.class, new ActionState.ActionFactories(action -> new AoeDamageFollowupActionState((AoeDamageFollowupAction) action))),
+        DRAW_FOLLOWUP_ACTION(CardDrawFollowupAction.class),
+        HEALING_FOLLOWUP_ACTION(HealingFollowupAction.class),
+        ORANGE_PELLETS_FOLLOWUP_ACTION(OrangePelletsFollowupAction.class),
+        PRE_AOE_DAMAGE_ACTION(PreAoeDamageAction.class
+                , new ActionState.ActionFactories(action -> new PreAoeDamageActionState((PreAoeDamageAction) action))),
+        PRE_DRAW_ACTION(PreCardDrawAction.class, PreAmountAdjustmentAction.class),
+        PRE_GOLDEN_EYE_SCRY_ACTION(PreGoldenEyeScryAction.class, PreAmountAdjustmentAction.class, "baseScry"),
+        PRE_HEALING_ACTION(PreHealingAction.class, PreAmountAdjustmentAction.class),
+        PRE_ORANGE_PELLETS_ACTION(PreOrangePelletsAction.class, PreAmountAdjustmentAction.class),
+        PRE_SCRY_ACTION(PreScryAction.class, PreAmountAdjustmentAction.class),
+        WARPED_TONGS_FOLLOWUP_ACTION(WarpedTongsFollowupAction.class, new ActionState.ActionFactories(action -> WarpedTongsFollowupAction::new));
 
-        public final String actionClassName;
+        public final Class<? extends AbstractGameAction> actionClass;
         public final ActionState.ActionFactories factory;
 
-        ExtraActions(String actionClassName, ActionState.ActionFactories factory) {
-            this.actionClassName = actionClassName;
+        ExtraActions(Class<? extends AbstractGameAction> actionClass, ActionState.ActionFactories factory) {
+            this.actionClass = actionClass;
             this.factory = factory;
+        }
+
+        ExtraActions(Class<? extends AbstractGameAction> actionClass, Class<? extends AbstractGameAction> parentClass, String extraFieldName) {
+            this.actionClass = actionClass;
+            this.factory = new ActionState.ActionFactories(action -> new ActionState() {
+                final AmountAdjustmentCallback statTracker;
+                Object extraField = null;
+
+                {
+                    statTracker = ReflectionHacks.getPrivate(action, parentClass, "statTracker");
+                    if (extraFieldName != null) {
+                        extraField = ReflectionHacks.getPrivate(action, actionClass, extraFieldName);
+                    }
+                }
+
+                @Override
+                public AbstractGameAction loadAction() {
+                    if (extraField == null) {
+                        try {
+                            return actionClass.getConstructor(AmountAdjustmentCallback.class).newInstance(statTracker);
+                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                                 NoSuchMethodException e) {
+                            throw new RuntimeException(e);
+                        }
+                    } else {
+                        Class<?> extraFieldType = extraField.getClass();
+                        if (extraFieldType == Integer.class) {
+                            extraFieldType = int.class;
+                        }
+                        try {
+                            return actionClass.getConstructor(AmountAdjustmentCallback.class, extraFieldType).newInstance(statTracker, extraField);
+                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                                 NoSuchMethodException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+            });
+        }
+
+        ExtraActions(Class<? extends AbstractGameAction> actionClass, Class<? extends AbstractGameAction> parentClass) {
+            this(actionClass, parentClass, null);
+        }
+
+        ExtraActions(Class<? extends AbstractGameAction> actionClass, String extraFieldName) {
+            this(actionClass, actionClass, extraFieldName);
+        }
+
+        ExtraActions(Class<? extends AbstractGameAction> actionClass) {
+            this(actionClass, actionClass, null);
         }
 
     }
@@ -71,73 +126,49 @@ public class RelicStatsCompatibility {
         public static HashMap<Class, ActionState.ActionFactories> addCustomActions(HashMap<Class, ActionState.ActionFactories> __result) {
             if (checkForMod()) {
                 for (ExtraActions action : ExtraActions.values()) {
-                    try {
-                        __result.put(Class.forName("relicstats.actions." + action.actionClassName), action.factory);
-                    } catch (ClassNotFoundException e) {
-                        throw new RuntimeException("Class " + action.actionClassName + " from RelicStats not found", e);
-                    }
+                    __result.put(action.actionClass, action.factory);
                 }
             }
             return __result;
         }
     }
 
-    private static ActionState.ActionFactories makeRelicStatsFactory(String statTrackerClassName, String parentClassName, String... extraFieldNames) {
-        return new ActionState.ActionFactories(action -> new ActionState() {
-            final Object[] fields;
+    public static class PreAoeDamageActionState implements ActionState {
+        public ArrayList<UUID> affectedMonsters;
 
-            {
-                fields = new Object[extraFieldNames.length + 1];
-                try {
-                    fields[0] = ReflectionHacks.getPrivate(action, Class.forName("relicstats.actions." + parentClassName), "statTracker");
-                } catch (ClassNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-                for (int i = 0; i < extraFieldNames.length; i++) {
-                    fields[i + 1] = ReflectionHacks.getPrivate(action, action.getClass(), extraFieldNames[i]);
-                }
-            }
-
-            @Override
-            public AbstractGameAction loadAction() {
-                try {
-                    Class<?>[] pTypes = new Class[fields.length];
-                    pTypes[0] = Class.forName("relicstats." + statTrackerClassName);
-                    for (int i = 1; i < fields.length; i++) {
-                        pTypes[i] = fields[i].getClass();
-                        if (pTypes[i] == Integer.class) {
-                            pTypes[i] = int.class;
-                        }
-                    }
-                    return action.getClass().getConstructor(pTypes).newInstance(fields);
-                } catch (Exception e) {
-                    // Should not happen.
-                    throw new RuntimeException(e);
-                }
-            }
-        });
-    }
-
-    public static class PreHealingActionState implements ActionState {
-        Object statTracker;
-        Class<?> PreAmountAdjustmentAction;
-
-        public PreHealingActionState(AbstractGameAction action) {
-            try {
-                PreAmountAdjustmentAction = Class.forName("relicstats.actions.PreAmountAdjustmentAction");
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException("Class PreAmountAdjustmentAction from RelicStats not found", e);
-            }
-            statTracker = ReflectionHacks.getPrivate(action, PreAmountAdjustmentAction, "statTracker");
+        public PreAoeDamageActionState(PreAoeDamageAction action) {
+            affectedMonsters = action.getAffectedMonsters().stream().map(m -> AbstractCreaturePatches.ExtraFields.uuid.get(m)).collect(Collectors.toCollection(ArrayList::new));
         }
 
         public AbstractGameAction loadAction() {
-            try {
-                return (AbstractGameAction) PreAmountAdjustmentAction.getConstructor(statTracker.getClass()).newInstance(statTracker);
-            } catch (Exception e) {
-                // Should not happen.
-                throw new RuntimeException(e);
+            PreAoeDamageAction result = new PreAoeDamageAction();//(AbstractGameAction) PreAoeDamageAction.newInstance();
+            ReflectionHacks.setPrivate(result, PreAoeDamageAction.class, "affectedMonsters", affectedMonsters.stream().map(AbstractCreaturePatches::getMonsterFromUUID).collect(Collectors.toCollection(ArrayList::new)));
+            return result;
+        }
+    }
+
+    @SpirePatch(requiredModId = "RelicStats", clz = PreAoeDamageAction.class, method = "update")
+    public static class PreAoeDamageActionPatch {
+        @SpirePostfixPatch
+        public static void updateFollowUpAction(PreAoeDamageAction __instance) {
+            for (AbstractGameAction action : AbstractDungeon.actionManager.actions) {
+                if (action instanceof AoeDamageFollowupAction) {
+                    ReflectionHacks.setPrivate(action, AoeDamageFollowupAction.class, "preAction", __instance);
+                    break;
+                }
             }
+        }
+    }
+
+    public static class AoeDamageFollowupActionState implements ActionState {
+        public AmountIncreaseCallback statTracker;
+
+        public AoeDamageFollowupActionState(AoeDamageFollowupAction action) {
+            statTracker = ReflectionHacks.getPrivate(action, AoeDamageFollowupAction.class, "statTracker");
+        }
+
+        public AbstractGameAction loadAction() {
+            return new AoeDamageFollowupAction(statTracker, new PreAoeDamageAction());
         }
     }
 
