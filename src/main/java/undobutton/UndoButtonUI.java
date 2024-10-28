@@ -91,7 +91,7 @@ public class UndoButtonUI {
             this.disabledTexture = disabledTexture;
             setX(this.x - width / 2);
             setY(this.y - height / 2);
-            hide();
+            setClickable(false);
         }
 
         public boolean isVisible() {
@@ -125,8 +125,10 @@ public class UndoButtonUI {
             if (isVisibleAboveScreen) {
                 image = enabledTexture;
             }
-            if (isVisible() && isClickable()) {
-                setClickable(controller.isSafeToUndo() && !AbstractDungeon.player.isDraggingCard && !AbstractDungeon.player.inSingleTargetMode && !AbstractDungeon.topPanel.potionUi.targetMode);
+            if (isVisible()) {
+                setClickable(isClickable() && controller.isSafeToUndo() && !AbstractDungeon.player.isDraggingCard && !AbstractDungeon.player.inSingleTargetMode && !AbstractDungeon.topPanel.potionUi.targetMode);
+            } else {
+                setClickable(false);
             }
             super.update();
             if (isVisible()) {
@@ -139,12 +141,6 @@ public class UndoButtonUI {
                 }
                 alpha = MathUtils.lerp(alpha, targetAlpha, Gdx.graphics.getDeltaTime() * 9.0F);
             }
-        }
-
-        public void hide() {
-            isVisibleAboveScreen = false;
-            isVisibleBelowScreen = false;
-            setClickable(false);
         }
 
         public void onHover() {
