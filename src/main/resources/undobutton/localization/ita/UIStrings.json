@@ -24,6 +24,9 @@
   "${modID}:Settings Num States": {
     "TEXT": [
       "Massimo numero di azioni annullate:"
-    ]
+    ],
+    "TEXT_DICT": {
+      "width": "490.0F"
+    }
   }
 }

@@ -24,6 +24,9 @@
   "${modID}:Settings Num States": {
     "TEXT": [
       "최대 실행 취소 가능 횟수:"
-    ]
+    ],
+    "TEXT_DICT": {
+      "width": "350.0F"
+    }
   }
 }

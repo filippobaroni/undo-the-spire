@@ -24,6 +24,9 @@
   "${modID}:Settings Num States": {
     "TEXT": [
       "Maximum number of undos:"
-    ]
+    ],
+    "TEXT_DICT": {
+      "width": "380.0F"
+    }
   }
 }

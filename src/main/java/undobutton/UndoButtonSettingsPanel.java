@@ -23,10 +23,12 @@ public class UndoButtonSettingsPanel extends ModPanel implements DropdownMenuLis
         super(me -> {
             numStatesStrings = CardCrawlGame.languagePack.getUIString(UndoButtonMod.makeID("Settings Num States"));
             undoStatesDropdown.setSelectedIndex(Arrays.binarySearch(UNDO_STATES_NUMBERS, UndoButtonMod.getMaxStates()));
+            try {
+                DROPDOWN_REL_X = Float.parseFloat(numStatesStrings.TEXT_DICT.get("width"));
+            } catch (NumberFormatException ignored) {
+            }
         });
-        ModLabel numStatesLabel = new ModLabel("", LABEL_X, LABEL_Y, Settings.CREAM_COLOR, FontHelper.charDescFont, this, me -> {
-            me.text = numStatesStrings.TEXT[0];
-        });
+        ModLabel numStatesLabel = new ModLabel("", LABEL_X, LABEL_Y, Settings.CREAM_COLOR, FontHelper.charDescFont, this, me -> me.text = numStatesStrings.TEXT[0]);
         this.addUIElement(numStatesLabel);
         undoStatesDropdown = new DropdownMenu(this, Arrays.stream(UNDO_STATES_NUMBERS).mapToObj(String::valueOf).toArray(String[]::new), FontHelper.tipBodyFont, Settings.CREAM_COLOR);
     }

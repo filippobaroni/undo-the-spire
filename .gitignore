@@ -3,4 +3,4 @@
 /.idea/
 *.xcf
 todo.md
-publish-on-steam.sh
+release-mod.sh
