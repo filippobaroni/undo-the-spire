@@ -287,9 +287,9 @@ public class GameState {
         public String toString() {
             switch (type) {
                 case CARD_PLAYED:
-                    return uiStrings.TEXT[0] + card.name;
+                    return uiStrings.TEXT[0] + card.name + uiStrings.TEXT[1];
                 case POTION_USED:
-                    return uiStrings.TEXT[0] + potion.name;
+                    return uiStrings.TEXT[0] + potion.name + uiStrings.TEXT[1];
                 case TURN_ENDED:
                     return uiStrings.TEXT[0];
                 case CARD_SELECTED:

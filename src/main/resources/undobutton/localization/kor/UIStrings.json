@@ -1,29 +1,29 @@
 {
   "${modID}:Card Action": {
     "TEXT": [
-      "gioca ",
-      ""
+      "",
+      " 사용"
     ]
   },
   "${modID}:Potion Action": {
     "TEXT": [
-      "usa ",
-      ""
+      "",
+      " 사용"
     ]
   },
   "${modID}:End Turn Action": {
     "TEXT": [
-      "fine turno"
+      "턴 종료"
     ]
   },
   "${modID}:Select Cards Action": {
     "TEXT": [
-      "scegli carte"
+      "카드 선택"
     ]
   },
   "${modID}:Settings Num States": {
     "TEXT": [
-      "Massimo numero di azioni annullate:"
+      "최대 실행 취소 가능 횟수:"
     ]
   }
 }

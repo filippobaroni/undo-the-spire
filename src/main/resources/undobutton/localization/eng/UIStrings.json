@@ -1,12 +1,14 @@
 {
   "${modID}:Card Action": {
     "TEXT": [
-      "play "
+      "play ",
+      ""
     ]
   },
   "${modID}:Potion Action": {
     "TEXT": [
-      "use "
+      "use ",
+      ""
     ]
   },
   "${modID}:End Turn Action": {
