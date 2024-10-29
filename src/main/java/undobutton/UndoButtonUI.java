@@ -79,6 +79,9 @@ public class UndoButtonUI {
         protected float width, height;
         protected TutorialStrings tutorialStrings;
         protected float alpha, targetAlpha;
+        public static final Color
+                BASE_TINT = new Color(1.0F, 1.0F, 1.0F, 0.0F),
+                FAILED_TINT = new Color(1.0F, 0.0F, 0.0F, 0.25F);
         protected float idleAlpha;
         protected Texture enabledTexture, disabledTexture;
         protected boolean isSpireAndShieldFight = false;
@@ -108,11 +111,20 @@ public class UndoButtonUI {
         @Override
         public void render(SpriteBatch sb) {
             if (isVisible()) {
-                if (isClickable() && hitbox.hovered) {
-                    TipHelper.renderGenericTip(x,
-                            y + height + TOOLTIP_OFFSET,
-                            String.format("%s (%s)", tutorialStrings.LABEL[0], getInputAction().getKeyString()),
-                            String.format("%s (%s).", tutorialStrings.TEXT[0], getLastActionString()));
+                if (hitbox.hovered) {
+                    String body = null;
+                    if (wasLastActionFailed()) {
+                        body = getLastActionString();
+                    } else if (isClickable()) {
+                        body = String.format("%s (%s).", tutorialStrings.TEXT[0], getLastActionString());
+                    }
+                    if (body != null) {
+                        TipHelper.renderGenericTip(
+                                x,
+                                y + height + TOOLTIP_OFFSET,
+                                String.format("%s (%s)", tutorialStrings.LABEL[0], getInputAction().getKeyString()),
+                                body);
+                    }
                 }
                 super.render(sb, new Color(1.0F, 1.0F, 1.0F, alpha));
             }
@@ -145,10 +157,9 @@ public class UndoButtonUI {
 
         public void onHover() {
             if (isVisible() && isClickable()) {
-                if (InputHelper.isMouseDown) {
-                    tint.a = 0.0F;
-                } else {
-                    tint.a = 0.25F;
+                tint = getBaseTint();
+                if (!InputHelper.isMouseDown) {
+                    tint = tint.lerp(Color.WHITE, 0.25F);
                 }
                 if (hitbox.justHovered) {
                     CardCrawlGame.sound.play("UI_HOVER");
@@ -157,9 +168,7 @@ public class UndoButtonUI {
         }
 
         public void onUnhover() {
-            if (isVisible()) {
-                tint.a = 0.0F;
-            }
+            tint = getBaseTint();
         }
 
         protected void onClick() {
@@ -167,9 +176,21 @@ public class UndoButtonUI {
             InputHelper.justClickedLeft = false;
         }
 
+        protected Color getBaseTint() {
+            if (!isClickable()) {
+                return BASE_TINT.cpy();
+            }
+            if (wasLastActionFailed()) {
+                return FAILED_TINT.cpy();
+            }
+            return BASE_TINT.cpy();
+        }
+
         protected abstract InputAction getInputAction();
 
         protected abstract String getLastActionString();
+
+        protected abstract boolean wasLastActionFailed();
     }
 
     class UndoButton extends UndoOrRedoButton {
@@ -201,6 +222,11 @@ public class UndoButtonUI {
         @Override
         protected String getLastActionString() {
             return UndoButtonMod.controller.getUndoActionString();
+        }
+
+        @Override
+        protected boolean wasLastActionFailed() {
+            return UndoButtonMod.controller.isUndoStateFailed();
         }
     }
 
@@ -242,6 +268,11 @@ public class UndoButtonUI {
         @Override
         protected String getLastActionString() {
             return UndoButtonMod.controller.getRedoActionString();
+        }
+
+        @Override
+        protected boolean wasLastActionFailed() {
+            return UndoButtonMod.controller.isRedoStateFailed();
         }
     }
 }

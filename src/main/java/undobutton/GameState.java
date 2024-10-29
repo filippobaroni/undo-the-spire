@@ -26,6 +26,7 @@ import savestate.CreatureState;
 import savestate.PlayerState;
 import savestate.SaveState;
 import savestate.powers.powerstates.monsters.BackAttackPowerState;
+import savestate.selectscreen.CardRewardScreenState;
 import savestate.selectscreen.GridCardSelectScreenState;
 import savestate.selectscreen.HandSelectScreenState;
 import undobutton.patches.AbstractCardPatches;
@@ -50,6 +51,11 @@ public class GameState {
 
     public GameState(Action action) {
         lastAction = action;
+        if (action.type == ActionType.FAILED) {
+            saveState = null;
+            extraState = null;
+            return;
+        }
         saveState = new SaveState();
         // Save extra state from @MakeUndoable classes
         extraState = new Object[extraStateHandlers.length];
@@ -108,6 +114,9 @@ public class GameState {
                 ReflectionHacks.setPrivate(saveState, SaveState.class, "gridSelectedCards", new ArrayList<>());
                 break;
             case CARD_REWARD:
+                CardRewardScreenState rewardScreen = ReflectionHacks.getPrivate(saveState, SaveState.class, "cardRewardScreenState");
+                ReflectionHacks.setPrivate(rewardScreen, CardRewardScreenState.class, "discoveryCard", null);
+                ReflectionHacks.setPrivate(rewardScreen, CardRewardScreenState.class, "touchCard", null);
                 break;
         }
     }
@@ -231,11 +240,11 @@ public class GameState {
     }
 
     public enum ActionType {
-        CARD_PLAYED, POTION_USED, CARD_SELECTED, TURN_ENDED
+        FAILED, CARD_PLAYED, POTION_USED, CARD_SELECTED, TURN_ENDED
     }
 
     public static class Action {
-        private final ActionType type;
+        public final ActionType type;
         private final AbstractCard card;
         private final AbstractPotion potion;
         private final UIStrings uiStrings;
@@ -243,6 +252,11 @@ public class GameState {
         public Action(ActionType type) {
             this.type = type;
             switch (type) {
+                case FAILED:
+                    card = null;
+                    potion = null;
+                    uiStrings = CardCrawlGame.languagePack.getUIString(UndoButtonMod.makeID("Failed Action"));
+                    break;
                 case TURN_ENDED:
                     card = null;
                     potion = null;
@@ -286,6 +300,8 @@ public class GameState {
 
         public String toString() {
             switch (type) {
+                case FAILED:
+                    return uiStrings.TEXT[0];
                 case CARD_PLAYED:
                     return uiStrings.TEXT[0] + card.name + uiStrings.TEXT[1];
                 case POTION_USED:
@@ -300,7 +316,7 @@ public class GameState {
         }
     }
 
-    public class PostLoadInfo {
+    static public class PostLoadInfo {
         public HashMap<UUID, AbstractCard> allCards;
 
         public PostLoadInfo() {

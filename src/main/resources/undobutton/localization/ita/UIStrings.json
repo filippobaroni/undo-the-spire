@@ -1,4 +1,9 @@
 {
+  "${modID}:Failed Action": {
+    "TEXT": [
+      "Qualcosa è andato storto, alcune azioni saranno saltate."
+    ]
+  },
   "${modID}:Card Action": {
     "TEXT": [
       "gioca ",

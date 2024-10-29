@@ -1,4 +1,9 @@
 {
+  "${modID}:Failed Action": {
+    "TEXT": [
+      "Something went wrong, some actions will be skipped."
+    ]
+  },
   "${modID}:Card Action": {
     "TEXT": [
       "",
