@@ -1,7 +1,7 @@
 {
   "${modID}:Failed Action": {
     "TEXT": [
-      "Qualcosa è andato storto, alcune azioni saranno saltate."
+      "Qualcosa è andato storto (controlla il log di ModTheSpire)."
     ]
   },
   "${modID}:Card Action": {

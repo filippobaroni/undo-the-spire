@@ -204,7 +204,7 @@ public class UndoButtonUI {
         public void update() {
             setClickable(UndoButtonMod.controller.canUndo());
             super.update();
-            if (!UndoButtonMod.controller.canUndo()) {
+            if (!UndoButtonMod.controller.canUndo() || wasLastActionFailed()) {
                 image = disabledTexture;
             }
         }
@@ -250,7 +250,7 @@ public class UndoButtonUI {
         public void update() {
             setClickable(UndoButtonMod.controller.canRedo());
             super.update();
-            if (!UndoButtonMod.controller.canRedo()) {
+            if (!UndoButtonMod.controller.canRedo() || wasLastActionFailed()) {
                 image = disabledTexture;
             }
         }
