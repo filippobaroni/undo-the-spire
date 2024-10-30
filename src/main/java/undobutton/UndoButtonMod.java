@@ -16,7 +16,6 @@ import com.evacipated.cardcrawl.modthespire.ModInfo;
 import com.evacipated.cardcrawl.modthespire.Patcher;
 import com.evacipated.cardcrawl.modthespire.lib.SpireConfig;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
-import com.evacipated.cardcrawl.modthespire.lib.SpireSideload;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.helpers.input.InputAction;
@@ -43,7 +42,6 @@ import java.util.stream.Collectors;
 import static java.lang.reflect.Modifier.isStatic;
 
 @SpireInitializer
-@SpireSideload(modIDs = {"SaveStateMod"})
 public class UndoButtonMod implements EditStringsSubscriber, PostInitializeSubscriber, OnStartBattleSubscriber, RenderSubscriber, PostUpdateSubscriber, PrePotionUseSubscriber {
     public static final boolean DEBUG = true;
 
