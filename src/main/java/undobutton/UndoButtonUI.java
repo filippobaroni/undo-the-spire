@@ -21,7 +21,7 @@ import static undobutton.UndoButtonMod.controller;
 import static undobutton.UndoButtonMod.imagePath;
 
 public class UndoButtonUI {
-    private static final float ENERGY_X = 198F, ENERGY_Y = 190F, ENERGY_Y_OFFSET = 128F, HORIZONTAL_SPACING = 10F, TOOLTIP_OFFSET = 120F;
+    private static final float ENERGY_X = 198F, ENERGY_HIDE_X = -480F, ENERGY_Y = 190F, ENERGY_Y_OFFSET = 128F, HORIZONTAL_SPACING = 10F, TOOLTIP_OFFSET = 120F;
     private Texture undoButtonTexture, undoButtonDisabledTexture, redoButtonTexture, redoButtonDisabledTexture;
     private UndoButton undoButton;
     private RedoButton redoButton;
@@ -40,6 +40,16 @@ public class UndoButtonUI {
     public void onStartBattle(AbstractRoom room) {
         undoButton.onStartBattle(room);
         redoButton.onStartBattle(room);
+    }
+
+    public void show() {
+        undoButton.show();
+        redoButton.show();
+    }
+
+    public void hide() {
+        undoButton.hide();
+        redoButton.hide();
     }
 
     public void render(SpriteBatch sb) {
@@ -79,6 +89,7 @@ public class UndoButtonUI {
         protected float width, height;
         protected TutorialStrings tutorialStrings;
         protected float alpha, targetAlpha;
+        protected float target_x;
         public static final Color
                 BASE_TINT = new Color(1.0F, 1.0F, 1.0F, 0.0F),
                 FAILED_TINT = new Color(1.0F, 0.0F, 0.0F, 0.25F);
@@ -86,19 +97,28 @@ public class UndoButtonUI {
         protected Texture enabledTexture, disabledTexture;
         protected boolean isSpireAndShieldFight = false;
 
-        public UndoOrRedoButton(Texture enabledTexture, Texture disabledTexture, float x, float y) {
-            super(enabledTexture, x, y, enabledTexture.getWidth(), enabledTexture.getHeight());
+        public UndoOrRedoButton(Texture enabledTexture, Texture disabledTexture) {
+            super(enabledTexture, 0, 0, enabledTexture.getWidth(), enabledTexture.getHeight());
             width = image.getWidth() * Settings.scale;
             height = image.getHeight() * Settings.scale;
             this.enabledTexture = enabledTexture;
             this.disabledTexture = disabledTexture;
-            setX(this.x - width / 2);
-            setY(this.y - height / 2);
+            target_x = getHideX() - width / 2;
+            setX(target_x);
+            setY(getY() - height / 2);
             setClickable(false);
         }
 
         public boolean isVisible() {
             return isVisibleBelowScreen || isVisibleAboveScreen;
+        }
+
+        public void show() {
+            target_x = getShowX() - width / 2;
+        }
+
+        public void hide() {
+            target_x = getHideX() - width / 2;
         }
 
         public void onStartBattle(AbstractRoom room) {
@@ -131,6 +151,7 @@ public class UndoButtonUI {
         }
 
         public void update() {
+            setX(MathUtils.lerp(x, target_x, Gdx.graphics.getDeltaTime() * 7.0F));
             if (isVisibleBelowScreen) {
                 image = AbstractDungeon.overlayMenu.endTurnButton.enabled ? enabledTexture : disabledTexture;
             }
@@ -186,6 +207,14 @@ public class UndoButtonUI {
             return BASE_TINT.cpy();
         }
 
+        protected abstract float getShowX();
+
+        protected abstract float getHideX();
+
+        protected float getY() {
+            return (ENERGY_Y + ENERGY_Y_OFFSET) * Settings.scale;
+        }
+
         protected abstract InputAction getInputAction();
 
         protected abstract String getLastActionString();
@@ -196,7 +225,7 @@ public class UndoButtonUI {
     class UndoButton extends UndoOrRedoButton {
 
         public UndoButton() {
-            super(undoButtonTexture, undoButtonDisabledTexture, ENERGY_X - (undoButtonTexture.getWidth() + HORIZONTAL_SPACING) / 2, ENERGY_Y + ENERGY_Y_OFFSET);
+            super(undoButtonTexture, undoButtonDisabledTexture);
             tutorialStrings = CardCrawlGame.languagePack.getTutorialString(UndoButtonMod.makeID("Undo Tip"));
         }
 
@@ -212,6 +241,16 @@ public class UndoButtonUI {
         protected void onClick() {
             super.onClick();
             UndoButtonMod.controller.undo();
+        }
+
+        @Override
+        protected float getShowX() {
+            return (ENERGY_X - (undoButtonTexture.getWidth() + HORIZONTAL_SPACING) / 2) * Settings.scale;
+        }
+
+        @Override
+        protected float getHideX() {
+            return (ENERGY_HIDE_X - (undoButtonTexture.getWidth() + HORIZONTAL_SPACING) / 2) * Settings.scale;
         }
 
         @Override
@@ -232,7 +271,7 @@ public class UndoButtonUI {
 
     class RedoButton extends UndoOrRedoButton {
         public RedoButton() {
-            super(redoButtonTexture, redoButtonDisabledTexture, ENERGY_X + (redoButtonTexture.getWidth() + HORIZONTAL_SPACING) / 2, ENERGY_Y + ENERGY_Y_OFFSET);
+            super(redoButtonTexture, redoButtonDisabledTexture);
             tutorialStrings = CardCrawlGame.languagePack.getTutorialString(UndoButtonMod.makeID("Redo Tip"));
         }
 
@@ -258,6 +297,16 @@ public class UndoButtonUI {
         protected void onClick() {
             super.onClick();
             UndoButtonMod.controller.redo();
+        }
+
+        @Override
+        protected float getShowX() {
+            return (ENERGY_X + (redoButtonTexture.getWidth() + HORIZONTAL_SPACING) / 2) * Settings.scale;
+        }
+
+        @Override
+        protected float getHideX() {
+            return (ENERGY_HIDE_X + (redoButtonTexture.getWidth() + HORIZONTAL_SPACING) / 2) * Settings.scale;
         }
 
         @Override
