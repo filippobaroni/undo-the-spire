@@ -1,0 +1,37 @@
+{
+  "${modID}:Failed Action": {
+    "TEXT": [
+      "出现问题 (检查 ModTheSpire 日志)."
+    ]
+  },
+  "${modID}:Card Action": {
+    "TEXT": [
+      "出牌",
+      ""
+    ]
+  },
+  "${modID}:Potion Action": {
+    "TEXT": [
+      "使用",
+      ""
+    ]
+  },
+  "${modID}:End Turn Action": {
+    "TEXT": [
+      "结束回合"
+    ]
+  },
+  "${modID}:Select Cards Action": {
+    "TEXT": [
+      "选择卡牌"
+    ]
+  },
+  "${modID}:Settings Num States": {
+    "TEXT": [
+      "最大撤销次数："
+    ],
+    "TEXT_DICT": {
+      "width": "220.0F"
+    }
+  }
+}
