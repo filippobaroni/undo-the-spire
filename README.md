@@ -265,7 +265,7 @@ In no particular order, I would like to thank all the people that made this proj
   the Spire**.
 - My partner ❤️, for countless hours spent testing the earliest, bug-filled versions of **Undo the Spire**, even at
   the (very concrete) risk of their runs being ruined by crashes &ndash; or, even worse, by a subtle bug that caused
-  enemies to occasionally drop slightly less gold.
+  enemies to occasionally drop slightly less gold. Also, for Simplified Chinese and Traditional Chinese localisations.
 - snumodder for Korean localisation.
 
 [modthespire]: https://steamcommunity.com/sharedfiles/filedetails/?id=1605060445
