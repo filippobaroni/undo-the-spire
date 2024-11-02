@@ -64,5 +64,14 @@ public class PlayerStatePatches {
             AbstractDungeon.actionManager.orbsChanneledThisTurn = ExtraFields.orbsChanneledThisTurn.get(__instance).stream().map(OrbState::loadOrb).collect(Collectors.toCollection(ArrayList::new));
             return __result;
         }
+
+        // Set Watcher's eye on the staff to match current stance
+        @SpirePostfixPatch
+        public static AbstractPlayer setWatcherEye(AbstractPlayer __result, PlayerState __instance) {
+            if (__result.chosenClass == AbstractPlayer.PlayerClass.WATCHER) {
+                __result.onStanceChange(__result.stance.ID);
+            }
+            return __result;
+        }
     }
 }
