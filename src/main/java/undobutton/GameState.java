@@ -21,20 +21,19 @@ import com.megacrit.cardcrawl.relics.BottledTornado;
 import com.megacrit.cardcrawl.ui.buttons.DynamicBanner;
 import com.megacrit.cardcrawl.ui.panels.PotionPopUp;
 import com.megacrit.cardcrawl.vfx.TintEffect;
-import savestate.CardState;
-import savestate.CreatureState;
-import savestate.PlayerState;
-import savestate.SaveState;
+import savestate.*;
 import savestate.powers.powerstates.monsters.BackAttackPowerState;
 import savestate.selectscreen.CardRewardScreenState;
 import savestate.selectscreen.GridCardSelectScreenState;
 import savestate.selectscreen.HandSelectScreenState;
 import undobutton.patches.AbstractCardPatches;
+import undobutton.patches.CardStatePatches;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class GameState {
@@ -69,6 +68,24 @@ public class GameState {
         // Turn is not ending in GameState
         ReflectionHacks.setPrivate(saveState, SaveState.class, "endTurnQueued", false);
         ReflectionHacks.setPrivate(saveState, SaveState.class, "isEndingTurn", false);
+        // Clear card queues
+        BiConsumer<Class<?>, String> clearQueue = (type, field) -> {
+            Object screen = ReflectionHacks.getPrivate(saveState, SaveState.class, field);
+            if (screen != null) {
+                ArrayList<CardQueueItemState> queue = ReflectionHacks.getPrivate(screen, type, "cardQueueState");
+                if (UndoButtonMod.DEBUG) {
+                    UndoButtonMod.logger.info(
+                            "Removing {} from card queue, but keeping {}.",
+                            queue.stream().filter(c -> !c.autoplayCard && !c.isEndTurnAutoPlay).map(c -> CardStatePatches.ExtraFields.name.get(c.card)).toArray(),
+                            queue.stream().filter(c -> c.autoplayCard || c.isEndTurnAutoPlay).map(c -> CardStatePatches.ExtraFields.name.get(c.card)).toArray()
+                    );
+                }
+                queue.removeIf(c -> !c.autoplayCard && !c.isEndTurnAutoPlay);
+            }
+        };
+        clearQueue.accept(CardRewardScreenState.class, "cardRewardScreenState");
+        clearQueue.accept(GridCardSelectScreenState.class, "gridCardSelectScreenState");
+        clearQueue.accept(HandSelectScreenState.class, "handSelectScreenState");
         // Handle surrounding (Shield and Spear fight)
         if (AbstractDungeon.getMonsters().getMonsterNames().contains("SpireShield")) {
             if (AbstractDungeon.getMonsters().getMonster("SpireSpear").isDying) {
@@ -231,9 +248,7 @@ public class GameState {
         if (AbstractDungeon.dynamicBanner.show) {
             DynamicBanner banner = AbstractDungeon.dynamicBanner;
             banner.appearInstantly(ReflectionHacks.getPrivate(banner, DynamicBanner.class, "label"));
-            Consumer<TintEffect> setToTarget = t -> {
-                t.color = ((Color) ReflectionHacks.getPrivate(t, TintEffect.class, "targetColor")).cpy();
-            };
+            Consumer<TintEffect> setToTarget = t -> t.color = ((Color) ReflectionHacks.getPrivate(t, TintEffect.class, "targetColor")).cpy();
             setToTarget.accept(ReflectionHacks.getPrivate(banner, DynamicBanner.class, "tint"));
             setToTarget.accept(ReflectionHacks.getPrivate(banner, DynamicBanner.class, "textTint"));
         }
