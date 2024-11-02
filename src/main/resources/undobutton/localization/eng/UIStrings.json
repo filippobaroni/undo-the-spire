@@ -1,7 +1,7 @@
 {
   "${modID}:Failed Action": {
     "TEXT": [
-      "Something went wrong (check ModTheSpire log)."
+      "Something went wrong (most likely due to compatibility issues with another mod)."
     ]
   },
   "${modID}:Card Action": {
