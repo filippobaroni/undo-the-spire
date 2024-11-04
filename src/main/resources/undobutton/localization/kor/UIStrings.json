@@ -1,7 +1,7 @@
 {
   "${modID}:Failed Action": {
     "TEXT": [
-      "Something went wrong (most likely due to compatibility issues with another mod)."
+      "문제가 발생했습니다 (다른 모드와 호환성 문제일 가능성이 높습니다)."
     ]
   },
   "${modID}:Card Action": {

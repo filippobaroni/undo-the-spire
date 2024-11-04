@@ -1,7 +1,7 @@
 {
   "${modID}:Failed Action": {
     "TEXT": [
-      "出现问题 (检查 ModTheSpire 日志)."
+      "出现问题（很可能由于与其他mod的兼容性问题所导致)."
     ]
   },
   "${modID}:Card Action": {
