@@ -250,7 +250,7 @@ public class UndoButtonUI {
 
         @Override
         protected float getHideX() {
-            return (ENERGY_HIDE_X - 8000F - (undoButtonTexture.getWidth() + HORIZONTAL_SPACING) / 2) * Settings.scale;
+            return (ENERGY_HIDE_X - 800F - (undoButtonTexture.getWidth() + HORIZONTAL_SPACING) / 2) * Settings.scale;
         }
 
         @Override
