@@ -1,6 +1,3 @@
-[url=https://discord.gg/TnxTeAw6S5]Join the Discord server![/url] | [url=https://ko-fi.com/Q5Q314YFIG]Buy me a shop relic![/url]
-
-[h1] Undo the Spire [/h1]
 [b]Undo the Spire[/b] is a [i]Slay the Spire[/i] mod that adds a button to undo your actions in combat.
 [list]
 [*] Played a block card before you realised you had lethal? [b]UNDO![/b]
@@ -18,6 +15,17 @@ With so many interactions happening in the game, it's nearly impossible to be aw
 [*] Work with controller (yet!).
 [*] Guarantee that you boss swap into Pandora's Box every time (yet!).
 [/list]
+
+[h2]Compatibility with other mods[/h2]
+[b]Undo the Spire[/b] relies on some fairly complex code to store all the information needed to undo and redo actions in combat. This code is specifically tailored to the base game, meaning that there is no guarantee that this mod will be compatible with other mods.
+As a general rule of thumb, QoL mods that don't affect the gameplay will usually work with [b]Undo the Spire[/b]. These include:
+[list]
+[*] RelicStats;
+[*] RNG Fix;
+[*] Minty Spire;
+[*] Mapmarks.
+[/list]
+Content mods that heavily affect the gameplay by introducing entirely new mechanics (such as Downfall) will usually [b]not[/b] work with [b]Undo the Spire[/b]. There is a grey area in between, with mods that add cards/relics/characters but no new mechanics, which may or may not be compatible with [b]Undo the Spire[/b]. If you are unsure, the easiest way to assess compatibility is simply to try: the undo/redo buttons will be disabled if incompatibility with another mod is detected.
 
 [h2]Installation[/h2]
 [olist]
