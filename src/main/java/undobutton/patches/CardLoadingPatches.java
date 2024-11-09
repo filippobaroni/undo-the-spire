@@ -23,6 +23,8 @@ public class CardLoadingPatches {
             GameState.addPostLoadRunner((info) -> {
                 __result.card = info.getAbstractCard(__result.card);
                 if (__result.card == null) {
+                    // This can crash the game with triple Omniscience.
+                    // Consider not doing anything instead of crashing, should be fine.
                     throw new IllegalStateException("CardQueueItem card is null after loading");
                 }
             });

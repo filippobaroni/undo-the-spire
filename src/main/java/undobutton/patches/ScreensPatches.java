@@ -1,10 +1,9 @@
 package undobutton.patches;
 
 import basemod.ReflectionHacks;
-import com.evacipated.cardcrawl.modthespire.lib.SpireField;
-import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
-import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
-import com.evacipated.cardcrawl.modthespire.lib.SpirePrefixPatch;
+import com.evacipated.cardcrawl.modthespire.lib.*;
+import com.evacipated.cardcrawl.modthespire.patcher.PatchingException;
+import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import com.megacrit.cardcrawl.screens.CardRewardScreen;
@@ -12,6 +11,8 @@ import com.megacrit.cardcrawl.screens.select.GridCardSelectScreen;
 import com.megacrit.cardcrawl.screens.select.HandCardSelectScreen;
 import com.megacrit.cardcrawl.ui.buttons.GridSelectConfirmButton;
 import com.megacrit.cardcrawl.ui.buttons.PeekButton;
+import javassist.CannotCompileException;
+import javassist.CtBehavior;
 import savestate.selectscreen.CardRewardScreenState;
 import savestate.selectscreen.GridCardSelectScreenState;
 import savestate.selectscreen.HandSelectScreenState;
@@ -26,9 +27,13 @@ public class ScreensPatches {
             AbstractRoom room = AbstractDungeon.getCurrRoom();
             if (room != null && room.phase == AbstractRoom.RoomPhase.COMBAT) {
                 switch (AbstractDungeon.screen) {
+                    case CARD_REWARD:
+                        // The "choose one" screens have to be dealt separately, since onChoseThisOption() is called before the screen is closed.
+                        if (ReflectionHacks.getPrivate(AbstractDungeon.cardRewardScreen, CardRewardScreen.class, "chooseOne")) {
+                            break;
+                        }
                     case HAND_SELECT:
                     case GRID:
-                    case CARD_REWARD:
                         UndoButtonMod.controller.addState(new GameState.Action(GameState.ActionType.CARD_SELECTED));
                         UndoButtonMod.logger.info("Added new state before selecting cards.");
                         break;
@@ -130,4 +135,32 @@ public class ScreensPatches {
             AbstractDungeon.overlayMenu.showBlackScreen();
         }
     }
+
+    public static class ChooseOneAddStatePatches {
+        @SpirePatch(clz = CardRewardScreen.class, method = "update")
+        public static class CardRewardScreenUpdatePatch {
+            @SpireInsertPatch(locator = Locator.class)
+            public static void addState() {
+                UndoButtonMod.controller.addState(new GameState.Action(GameState.ActionType.CARD_SELECTED));
+                UndoButtonMod.logger.info("Added new state before selecting card.");
+            }
+        }
+
+        @SpirePatch(clz = CardRewardScreen.class, method = "cardSelectUpdate")
+        public static class CardRewardScreenCardSelectUpdatePatch {
+            @SpireInsertPatch(locator = Locator.class)
+            public static void addState() {
+                UndoButtonMod.controller.addState(new GameState.Action(GameState.ActionType.CARD_SELECTED));
+                UndoButtonMod.logger.info("Added new state before selecting card.");
+            }
+        }
+
+        public static class Locator extends SpireInsertLocator {
+            public int[] Locate(CtBehavior ctMethodToPatch) throws CannotCompileException, PatchingException {
+                Matcher finalMatcher = new Matcher.MethodCallMatcher(AbstractCard.class, "onChoseThisOption");
+                return LineFinder.findAllInOrder(ctMethodToPatch, finalMatcher);
+            }
+        }
+    }
+
 }
