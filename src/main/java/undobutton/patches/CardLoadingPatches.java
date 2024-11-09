@@ -21,11 +21,9 @@ public class CardLoadingPatches {
         @SpirePostfixPatch
         static public CardQueueItem linkCard(CardQueueItem __result, CardQueueItemState __instance) {
             GameState.addPostLoadRunner((info) -> {
-                __result.card = info.getAbstractCard(__result.card);
-                if (__result.card == null) {
-                    // This can crash the game with triple Omniscience.
-                    // Consider not doing anything instead of crashing, should be fine.
-                    throw new IllegalStateException("CardQueueItem card is null after loading");
+                AbstractCard c = info.getAbstractCard(__result.card);
+                if (c != null) {
+                    __result.card = c;
                 }
             });
             return __result;
@@ -52,7 +50,10 @@ public class CardLoadingPatches {
         @SpirePostfixPatch
         public static AbstractGameAction linkCard(AbstractGameAction __result, ExhumeActionState __instance) {
             GameState.addPostLoadRunner((info) -> {
-                ((ArrayList<AbstractCard>) ReflectionHacks.getPrivate(__result, ExhumeAction.class, "exhumes")).replaceAll(info::getAbstractCard);
+                ((ArrayList<AbstractCard>) ReflectionHacks.getPrivate(__result, ExhumeAction.class, "exhumes")).replaceAll(c0 -> {
+                    AbstractCard c = info.getAbstractCard(c0);
+                    return c == null ? c0 : c;
+                });
             });
             return __result;
         }
