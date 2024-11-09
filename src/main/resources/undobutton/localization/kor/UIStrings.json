@@ -16,6 +16,12 @@
       " 사용"
     ]
   },
+  "${modID}:Potion Discard Action": {
+    "TEXT": [
+      "",
+      " 버리기"
+    ]
+  },
   "${modID}:End Turn Action": {
     "TEXT": [
       "턴 종료"

@@ -255,7 +255,7 @@ public class GameState {
     }
 
     public enum ActionType {
-        FAILED, CARD_PLAYED, POTION_USED, CARD_SELECTED, TURN_ENDED
+        FAILED, CARD_PLAYED, POTION_USED, POTION_DISCARDED, CARD_SELECTED, TURN_ENDED
     }
 
     public static class Action {
@@ -308,6 +308,15 @@ public class GameState {
                         throw new IllegalArgumentException("Expected AbstractPotion, got " + data.getClass().getName());
                     }
                     break;
+                case POTION_DISCARDED:
+                    if (data instanceof AbstractPotion) {
+                        potion = ((AbstractPotion) data).makeCopy();
+                        card = null;
+                        uiStrings = CardCrawlGame.languagePack.getUIString(UndoButtonMod.makeID("Potion Discard Action"));
+                    } else {
+                        throw new IllegalArgumentException("Expected AbstractPotion, got " + data.getClass().getName());
+                    }
+                    break;
                 default:
                     throw new IllegalArgumentException("Wrong argument type for ActionType " + type);
             }
@@ -320,6 +329,8 @@ public class GameState {
                 case CARD_PLAYED:
                     return uiStrings.TEXT[0] + card.name + uiStrings.TEXT[1];
                 case POTION_USED:
+                    return uiStrings.TEXT[0] + potion.name + uiStrings.TEXT[1];
+                case POTION_DISCARDED:
                     return uiStrings.TEXT[0] + potion.name + uiStrings.TEXT[1];
                 case TURN_ENDED:
                     return uiStrings.TEXT[0];
