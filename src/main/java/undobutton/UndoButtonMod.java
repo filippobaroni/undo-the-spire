@@ -64,7 +64,7 @@ public class UndoButtonMod implements EditStringsSubscriber, PostInitializeSubsc
 
     public UndoButtonMod() {
         Properties defaults = new Properties();
-        defaults.setProperty("maxStates", "100");
+        defaults.setProperty("maxStates", "50");
         try {
             optionsConfig = new SpireConfig(modID, "config", defaults);
         } catch (IOException e) {

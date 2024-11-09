@@ -13,7 +13,7 @@ import com.megacrit.cardcrawl.screens.options.DropdownMenuListener;
 import java.util.Arrays;
 
 public class UndoButtonSettingsPanel extends ModPanel implements DropdownMenuListener {
-    public static final int[] UNDO_STATES_NUMBERS = {10, 20, 50, 100, 200, 500, 1000};
+    public static final int[] UNDO_STATES_NUMBERS = {5, 10, 20, 50, 100, 200, 500};
     public static float LABEL_X = 380.0F, LABEL_Y = 792.0F;
     public static float DROPDOWN_REL_X = 380.0F, DROPDOWN_REL_Y = 22.0F;
     private static DropdownMenu undoStatesDropdown;
