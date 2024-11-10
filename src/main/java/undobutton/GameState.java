@@ -6,9 +6,9 @@ import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.localization.UIStrings;
 import com.megacrit.cardcrawl.potions.AbstractPotion;
+import com.megacrit.cardcrawl.rooms.AbstractRoom;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 public class GameState {
     static GameState currentlyCreating;
@@ -16,10 +16,10 @@ public class GameState {
     public Action lastAction;
 
     public PlayerState playerState;
+    public AbstractRoom room;
     public GameActionManager actionManager;
     public RngState rngState;
 
-    public Map<Object, Object> objects;
 
     public int totalDiscardedThisTurn = 0;
     public int damageReceivedThisTurn = 0;
@@ -32,19 +32,44 @@ public class GameState {
     public ArrayList<AbstractCard> drawnCards;
 
     public GameState(Action action) {
-        currentlyCreating = this;
         lastAction = action;
         if (action.type == ActionType.FAILED) {
             return;
         }
+        StateCloner.cloner.initCloningBatch();
+
         rngState = new RngState();
         playerState = new PlayerState(AbstractDungeon.player);
-        currentlyCreating = null;
+        room = StateCloner.clone(AbstractDungeon.getCurrRoom());
+        actionManager = StateCloner.clone(AbstractDungeon.actionManager);
+
+        totalDiscardedThisTurn = GameActionManager.totalDiscardedThisTurn;
+        damageReceivedThisTurn = GameActionManager.damageReceivedThisTurn;
+        damageReceivedThisCombat = GameActionManager.damageReceivedThisCombat;
+        hpLossThisCombat = GameActionManager.hpLossThisCombat;
+        playerHpLastTurn = GameActionManager.playerHpLastTurn;
+        energyGainedThisCombat = GameActionManager.energyGainedThisCombat;
+        turn = GameActionManager.turn;
+
+        StateCloner.cloner.endCloningBatch();
+
+        // Clear card queue
+        actionManager.cardQueue.removeIf(c -> !c.autoplayCard && !c.isEndTurnAutoPlay);
     }
 
     public void apply() {
         rngState.load();
         playerState.load(AbstractDungeon.player);
+        AbstractDungeon.getCurrMapNode().room = room;
+        AbstractDungeon.actionManager = actionManager;
+
+        GameActionManager.totalDiscardedThisTurn = totalDiscardedThisTurn;
+        GameActionManager.damageReceivedThisTurn = damageReceivedThisTurn;
+        GameActionManager.damageReceivedThisCombat = damageReceivedThisCombat;
+        GameActionManager.hpLossThisCombat = hpLossThisCombat;
+        GameActionManager.playerHpLastTurn = playerHpLastTurn;
+        GameActionManager.energyGainedThisCombat = energyGainedThisCombat;
+        GameActionManager.turn = turn;
     }
 
 

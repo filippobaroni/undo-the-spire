@@ -11,8 +11,6 @@ import javassist.CtBehavior;
 import undobutton.GameState;
 import undobutton.UndoButtonMod;
 
-import java.util.ArrayList;
-
 public class OnCardUsePatches {
     @SpirePatch(clz = GameActionManager.class, method = "getNextAction")
     public static class GetNextActionPatch {
@@ -30,10 +28,8 @@ public class OnCardUsePatches {
 
         public static class Locator extends SpireInsertLocator {
             public int[] Locate(CtBehavior ctMethodToPatch) throws CannotCompileException, PatchingException {
-                Matcher finalMatcher = new Matcher.FieldAccessMatcher(AbstractCard.class, "dontTriggerOnUseCard");
-                ArrayList<Matcher> prerequisites = new ArrayList<>();
-                prerequisites.add(new Matcher.MethodCallMatcher(AbstractCard.class, "freeToPlay"));
-                return LineFinder.findInOrder(ctMethodToPatch, prerequisites, finalMatcher);
+                Matcher finalMatcher = new Matcher.MethodCallMatcher(AbstractCard.class, "freeToPlay");
+                return LineFinder.findInOrder(ctMethodToPatch, finalMatcher);
             }
         }
     }

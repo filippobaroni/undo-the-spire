@@ -15,16 +15,13 @@ public class PlayerState extends AbstractCreature {
     CardGroup masterDeck;
 
     public PlayerState(AbstractPlayer player) {
-        if (GameState.currentlyCreating == null) {
-            throw new IllegalStateException("PlayerState can only be created during GameState creation");
-        }
-        hand = StateCloner.deepClone(player.hand);
-        drawPile = StateCloner.deepClone(player.drawPile);
-        discardPile = StateCloner.deepClone(player.discardPile);
-        exhaustPile = StateCloner.deepClone(player.exhaustPile);
-        limbo = StateCloner.deepClone(player.limbo);
-        masterDeck = StateCloner.deepClone(player.masterDeck);
-        StateCloner.cloneAllFieldsTo(AbstractCreature.class, player, this, GameState.currentlyCreating.objects);
+        hand = StateCloner.clone(player.hand);
+        drawPile = StateCloner.clone(player.drawPile);
+        discardPile = StateCloner.clone(player.discardPile);
+        exhaustPile = StateCloner.clone(player.exhaustPile);
+        limbo = StateCloner.clone(player.limbo);
+        masterDeck = StateCloner.clone(player.masterDeck);
+        StateCloner.cloner.cloneClassFieldsTo(AbstractCreature.class, player, this);
     }
 
     public void load(AbstractPlayer player) {
@@ -34,7 +31,7 @@ public class PlayerState extends AbstractCreature {
         player.exhaustPile = exhaustPile;
         player.limbo = limbo;
         player.masterDeck = masterDeck;
-        StateCloner.moveAllFieldsTo(AbstractCreature.class, this, player);
+        StateCloner.cloner.moveClassFieldsTo(AbstractCreature.class, this, player);
 
         // Refresh hand layout
         player.hand.refreshHandLayout();
