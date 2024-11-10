@@ -25,21 +25,15 @@ import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import com.megacrit.cardcrawl.potions.AbstractPotion;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import com.megacrit.cardcrawl.ui.panels.PotionPopUp;
-import javassist.CannotCompileException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.scannotation.AnnotationDB;
-import savestate.CardState;
-import savestate.relics.RelicState;
 import undobutton.util.GeneralUtils;
-import undobutton.util.MakeUndoable;
 import undobutton.util.TextureLoader;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static java.lang.reflect.Modifier.isStatic;
 
 @SpireInitializer
 public class UndoButtonMod implements EditStringsSubscriber, PostInitializeSubscriber, OnStartBattleSubscriber, RenderSubscriber, PostUpdateSubscriber, PrePotionUseSubscriber {
@@ -74,36 +68,6 @@ public class UndoButtonMod implements EditStringsSubscriber, PostInitializeSubsc
         ui = new UndoButtonUI();
         BaseMod.subscribe(this); //This will make BaseMod trigger all the subscribers at their appropriate times.
         logger.info("{} subscribed to BaseMod.", modID);
-        // Find all @MakeUndoable classes
-        ArrayList<Class<?>> handlers = findAllClassesWithAnnotation(MakeUndoable.class.getName()).stream().map(name -> {
-            try {
-                return (Class<?>) Loader.getClassPool().getOrNull(name).toClass();
-            } catch (CannotCompileException e) {
-                // This should never happen.
-                throw new RuntimeException(e);
-            }
-        }).collect(Collectors.toCollection(ArrayList::new));
-        GameState.extraStateHandlers = new Class<?>[handlers.size()];
-        GameState.extraStateTypes = new Class<?>[handlers.size()];
-        for (int i = 0; i < handlers.size(); i++) {
-            Class<?> h = handlers.get(i);
-            GameState.extraStateTypes[i] = h.getAnnotation(MakeUndoable.class).statetype();
-            try {
-                if (!isStatic(h.getMethod("save").getModifiers())) {
-                    throw new RuntimeException("Method save in class " + h.getName() + " must be static");
-                }
-            } catch (NoSuchMethodException e) {
-                throw new RuntimeException("Class " + h.getName() + " does not have a save method");
-            }
-            try {
-                if (!isStatic(h.getMethod("load", GameState.extraStateTypes[i]).getModifiers())) {
-                    throw new RuntimeException("Method load in class " + h.getName() + " must be static");
-                }
-            } catch (NoSuchMethodException e) {
-                throw new RuntimeException("Class " + h.getName() + " does not have a load method");
-            }
-            GameState.extraStateHandlers[i] = h;
-        }
     }
 
     public static int getMaxStates() {
@@ -172,6 +136,8 @@ public class UndoButtonMod implements EditStringsSubscriber, PostInitializeSubsc
 
     @Override
     public void receivePostInitialize() {
+        // Initialise the cloner
+        StateCloner.initialise();
         //This loads the image used as an icon in the in-game mods menu.
         Texture badgeTexture = TextureLoader.getTexture(imagePath("badge.png"));
         //Set up the mod information displayed in the in-game mods menu.
@@ -192,8 +158,6 @@ public class UndoButtonMod implements EditStringsSubscriber, PostInitializeSubsc
     @Override
     public void receiveOnBattleStart(AbstractRoom room) {
         controller.onStartBattle(room);
-        CardState.resetFreeCards();
-        RelicState.resetFreeRelics();
         ui.onStartBattle(room);
     }
 

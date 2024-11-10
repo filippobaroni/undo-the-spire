@@ -21,11 +21,9 @@ public class OnCardUsePatches {
             if (!__instance.cardQueue.get(0).autoplayCard && !__instance.cardQueue.get(0).card.dontTriggerOnUseCard) {
                 UndoButtonMod.controller.addState(new GameState.Action(GameState.ActionType.CARD_PLAYED, __instance.cardQueue.get(0).card));
                 UndoButtonMod.logger.info("Added new state before playing card {}", __instance.cardQueue.get(0).card.name);
-                if (AbstractDungeon.getMonsters().getMonsterNames().contains("SpireShield")) {
-                    AbstractMonster m = __instance.cardQueue.get(0).monster;
-                    if (m != null) {
-                        UndoButtonMod.controller.isPlayerFlippedHorizontally = m.drawX < AbstractDungeon.player.drawX;
-                    }
+                AbstractMonster m = __instance.cardQueue.get(0).monster;
+                if (m != null) {
+                    UndoButtonMod.controller.isPlayerFlippedHorizontally = m.drawX < AbstractDungeon.player.drawX;
                 }
             }
         }

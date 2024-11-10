@@ -16,6 +16,12 @@
       ""
     ]
   },
+  "${modID}:Potion Discard Action": {
+    "TEXT": [
+      "discard ",
+      ""
+    ]
+  },
   "${modID}:End Turn Action": {
     "TEXT": [
       "end turn"

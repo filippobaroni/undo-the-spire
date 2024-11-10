@@ -8,7 +8,7 @@ import com.megacrit.cardcrawl.core.OverlayMenu;
 import undobutton.UndoButtonMod;
 import undobutton.UndoButtonUI;
 
-public class OverlayMenuPatches {
+public class RenderButtonsOnOverlayMenuPatches {
     @SpirePatch(clz = OverlayMenu.class, method = "render")
     public static class RenderPatch {
         @SpirePrefixPatch

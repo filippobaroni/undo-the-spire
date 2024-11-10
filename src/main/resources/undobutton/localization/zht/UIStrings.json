@@ -16,6 +16,12 @@
       ""
     ]
   },
+  "${modID}:Potion Discard Action": {
+    "TEXT": [
+      "丟棄",
+      ""
+    ]
+  },
   "${modID}:End Turn Action": {
     "TEXT": [
       "結束回合"
