@@ -20,6 +20,33 @@ import undobutton.GameState;
 import undobutton.UndoButtonMod;
 
 public class ScreensPatches {
+    // HandSelectScreenState throws when creating a new state if the action queue is empty, even though it has no reason to.
+    // This patch fixes that.
+    public static class HandSelectScreenExceptionPatches {
+        @SpirePatch(clz = HandSelectScreenState.class, method = SpirePatch.CONSTRUCTOR)
+        public static class HandSelectConstructorPatch {
+            @SpireInsertPatch(locator = Locator.class)
+            public static SpireReturn<Void> prematureReturn(HandSelectScreenState __instance) {
+                return SpireReturn.Return(null);
+            }
+        }
+
+        @SpirePatch(clz = HandSelectScreenState.class, method = "loadHandSelectScreenState")
+        public static class HandSelectLoadPatch {
+            @SpireInsertPatch(locator = Locator.class)
+            public static SpireReturn<Void> prematureReturn(HandSelectScreenState __instance) {
+                return SpireReturn.Return(null);
+            }
+        }
+
+        public static class Locator extends SpireInsertLocator {
+            public int[] Locate(CtBehavior ctMethodToPatch) throws CannotCompileException, PatchingException {
+                Matcher finalMatcher = new Matcher.NewExprMatcher(IllegalStateException.class);
+                return LineFinder.findInOrder(ctMethodToPatch, finalMatcher);
+            }
+        }
+    }
+
     @SpirePatch(clz = AbstractDungeon.class, method = "closeCurrentScreen")
     public static class CloseCurrentScreenPatch {
         @SpirePrefixPatch
