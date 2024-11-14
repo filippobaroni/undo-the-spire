@@ -91,9 +91,17 @@ public class ScreensPatches {
         }
 
         @SpirePostfixPatch
-        public static void post(HandSelectScreenState __instance) {
-            AbstractDungeon.handCardSelectScreen.selectionReason = HandExtraFields.selectionReason.get(__instance);
-            ReflectionHacks.privateMethod(HandCardSelectScreen.class, "updateMessage").invoke(AbstractDungeon.handCardSelectScreen);
+        public static void post(HandSelectScreenState __instance, boolean ___canPickZero) {
+            HandCardSelectScreen screen = AbstractDungeon.handCardSelectScreen;
+            screen.selectionReason = HandExtraFields.selectionReason.get(__instance);
+            ReflectionHacks.privateMethod(HandCardSelectScreen.class, "updateMessage").invoke(screen);
+            if (___canPickZero) {
+                screen.button.enable();
+            } else {
+                screen.button.disable();
+            }
+            screen.button.hideInstantly();
+            screen.button.show();
         }
     }
 
