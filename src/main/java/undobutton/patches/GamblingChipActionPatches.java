@@ -21,6 +21,15 @@ public class GamblingChipActionPatches {
         }
     }
 
+    @SpirePatch(clz = StateFactories.class, method = "createActionMap")
+    public static class StateFactoriesPatch2 {
+        @SpirePostfixPatch
+        public static HashMap<Class, savestate.actions.ActionState.ActionFactories> addGamblingFactory(HashMap<Class, savestate.actions.ActionState.ActionFactories> __result) {
+            __result.put(GamblingChipAction.class, new savestate.actions.ActionState.ActionFactories(GamblingChipActionPatches.ActionState::new));
+            return __result;
+        }
+    }
+
     public static class ActionState implements CurrentActionState, savestate.actions.ActionState {
         final boolean notchip;
 
