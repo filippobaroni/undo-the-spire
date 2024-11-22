@@ -66,7 +66,7 @@ public class GameState {
             }
         }
         // Turn is not ending in GameState
-        ReflectionHacks.setPrivate(saveState, SaveState.class, "endTurnQueued", false);
+//        ReflectionHacks.setPrivate(saveState, SaveState.class, "endTurnQueued", false);
         ReflectionHacks.setPrivate(saveState, SaveState.class, "isEndingTurn", false);
         // Clear card queues
         BiConsumer<Class<?>, String> clearQueue = (type, field) -> {

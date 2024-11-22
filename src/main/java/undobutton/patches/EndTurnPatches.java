@@ -3,6 +3,7 @@ package undobutton.patches;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.evacipated.cardcrawl.modthespire.patcher.PatchingException;
 import com.megacrit.cardcrawl.actions.GameActionManager;
+import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.ui.buttons.EndTurnButton;
 import javassist.CannotCompileException;
 import javassist.CtBehavior;
@@ -15,7 +16,10 @@ public class EndTurnPatches {
         public static void Prefix(GameActionManager __instance) {
             if (!UndoButtonMod.controller.isThisEndTurnForced) {
                 UndoButtonMod.logger.info("Adding new state before ending turn.");
+                boolean endTurnQueued = AbstractDungeon.player.endTurnQueued;
+                AbstractDungeon.player.endTurnQueued = false;
                 UndoButtonMod.controller.addState(new GameState.Action(GameState.ActionType.TURN_ENDED));
+                AbstractDungeon.player.endTurnQueued = endTurnQueued;
             }
         }
     }
