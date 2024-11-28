@@ -55,6 +55,11 @@ public class GameState {
             extraState = null;
             return;
         }
+        // Should turn be ending in saveState?
+        boolean endTurnQueued = AbstractDungeon.player.endTurnQueued;
+        if (AbstractDungeon.actionManager.cardQueue.stream().anyMatch(c -> !c.autoplayCard && !c.isEndTurnAutoPlay)) {
+            endTurnQueued = false;
+        }
         saveState = new SaveState();
         // Save extra state from @MakeUndoable classes
         extraState = new Object[extraStateHandlers.length];
@@ -65,8 +70,8 @@ public class GameState {
                 throw new RuntimeException(e);
             }
         }
-        // Turn is not ending in GameState
-//        ReflectionHacks.setPrivate(saveState, SaveState.class, "endTurnQueued", false);
+        // Turn is not ending in saveState
+        ReflectionHacks.setPrivate(saveState, SaveState.class, "endTurnQueued", endTurnQueued);
         ReflectionHacks.setPrivate(saveState, SaveState.class, "isEndingTurn", false);
         // Clear card queues
         BiConsumer<Class<?>, String> clearQueue = (type, field) -> {
@@ -76,11 +81,11 @@ public class GameState {
                 if (UndoButtonMod.DEBUG) {
                     UndoButtonMod.logger.info(
                             "Removing {} from card queue, but keeping {}.",
-                            queue.stream().filter(c -> !c.autoplayCard && !c.isEndTurnAutoPlay).map(c -> CardStatePatches.ExtraFields.name.get(c.card)).toArray(),
-                            queue.stream().filter(c -> c.autoplayCard || c.isEndTurnAutoPlay).map(c -> CardStatePatches.ExtraFields.name.get(c.card)).toArray()
+                            queue.stream().filter(c -> c.card != null && (!c.autoplayCard && !c.isEndTurnAutoPlay)).map(c -> CardStatePatches.ExtraFields.name.get(c.card)).toArray(),
+                            queue.stream().filter(c -> c.card != null && (c.autoplayCard || c.isEndTurnAutoPlay)).map(c -> CardStatePatches.ExtraFields.name.get(c.card)).toArray()
                     );
                 }
-                queue.removeIf(c -> !c.autoplayCard && !c.isEndTurnAutoPlay);
+                queue.removeIf(c -> c.card == null || (!c.autoplayCard && !c.isEndTurnAutoPlay));
             }
         };
         clearQueue.accept(CardRewardScreenState.class, "cardRewardScreenState");
