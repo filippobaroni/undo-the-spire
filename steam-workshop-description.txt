@@ -16,6 +16,13 @@ With so many interactions happening in the game, it's nearly impossible to be aw
 [*] Guarantee that you boss swap into Pandora's Box every time (yet!).
 [/list]
 
+[h2]Known bugs[/h2]
+[list]
+[*] Some users experience crashes when undoing in the Three Mushrooms fight or in the Dead Adventurer fight.
+This is a known issue, and hopefully a fix is on the way.
+In the meantime, if you are affected by this bug, consider playing very carefully in these fights :) qqqqqqq.
+[/list]
+
 [h2]Compatibility with other mods[/h2]
 [b]Undo the Spire[/b] relies on some fairly complex code to store all the information needed to undo and redo actions in combat. This code is specifically tailored to the base game, meaning that there is no guarantee that this mod will be compatible with other mods.
 As a general rule of thumb, QoL mods that don't affect the gameplay will usually work with [b]Undo the Spire[/b]. These include:

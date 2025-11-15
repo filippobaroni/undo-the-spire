@@ -1,8 +1,8 @@
 # Undo the Spire
 
-<p align="center">
+<p style="text-align:center">
 <a href="https://github.com/filippobaroni/undo-the-spire/releases/latest">
-<img alt="GitHub Tag" src="https://img.shields.io/github/v/release/filippobaroni/undo-the-spire?include_prereleases&logo=GitHub" alt="GitHub release"></a>
+<img src="https://img.shields.io/github/v/release/filippobaroni/undo-the-spire?include_prereleases&logo=GitHub" alt="GitHub release"></a>
 <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3354673683">
 <img src="https://img.shields.io/badge/Install from Steam-000?logo=Steam&logoColor=white" alt="Install from steam" /></a>
 <a href="https://discord.gg/TnxTeAw6S5">
@@ -12,7 +12,7 @@
 </p>
 
 
-<p align="center"><img style="width:85%" src="media/trailer.gif" alt="Loading clip..."/></p>
+<p style="text-align:center"><img style="width:85%" src="media/trailer.gif" alt="Loading clip..."/></p>
 
 **Undo the Spire** is a *Slay the Spire* mod that adds a button to undo your actions in combat.
 
@@ -108,6 +108,11 @@ in the future).
 
 - Make sure that you've selected all the required dependencies for **Undo the Spire** in the ModTheSpire launcher.
 
+**If the game crashes when you undo an action during the Three Mushroom fight or Dead Adventurer fight**
+
+- This is a known bug that affects some users, hopefully a fix is on the way.
+  In the meantime, if you are one of these users, consider not using the undo button in these fights.
+
 **If you don't see undo/redo buttons in combat**
 
 - Make sure you're playing the game with mods (there should be a faint text in the bottom left or top right corner
@@ -168,7 +173,7 @@ While compatibility can’t always be guaranteed, I aim to make **Undo the Spire
 **Go the extra mile**<br/>
 If you really love **Undo the Spire** and want to support its development, you could
 
-<p align="center"><a href='https://ko-fi.com/Q5Q314YFIG' target='_blank'><img style='border:none;height:36px' src='media/support-me.png' alt='Buy me a shop relic' /></a></p>
+<p style="text-align:center"><a href='https://ko-fi.com/Q5Q314YFIG' target='_blank'><img style='border:none;height:36px' src='media/support-me.png' alt='Buy me a shop relic' /></a></p>
 
 It will make my day!
 
