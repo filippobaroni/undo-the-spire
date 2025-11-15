@@ -1,12 +1,10 @@
 #!/usr/bin/env bash
 
-#!/bin/bash
-
 # Define variables
-SLAY_THE_SPIRE_PATH="$HOME/.local/share/Steam/steamapps/common/SlayTheSpire/"
+SLAY_THE_SPIRE_PATH="$HOME/.local/share/Steam/steamapps/common/SlayTheSpire"
 MOD_DIR="undothespire"
 UNDO_FILE="src/main/java/undobutton/UndoButtonMod.java"
-JAVA_COMMAND="/home/delfad0r/.jdks/liberica-1.8.0_422/bin/java -Dmaven.multiModuleProjectDirectory=/home/delfad0r/Documents/programming/undo-the-spire -Dfile.encoding=UTF-8 -Dmaven.home=/usr/share/idea/plugins/maven/lib/maven3 -Dclassworlds.conf=/usr/share/idea/plugins/maven/lib/maven3/bin/m2.conf -classpath /usr/share/idea/plugins/maven/lib/maven3/boot/plexus-classworlds-2.8.0.jar org.codehaus.classworlds.Launcher package -P linux"
+JAVA_COMMAND="/home/delfad0r/Downloads/software/ideaIU-2025.2.4/idea-IU-252.27397.103/plugins/maven/lib/maven3/bin/mvn -Didea.version=2025.2.4 -Dmaven.ext.class.path=/home/delfad0r/Downloads/software/ideaIU-2025.2.4/idea-IU-252.27397.103/plugins/maven/lib/maven-event-listener.jar -Djansi.passthrough=true -Dstyle.color=always -Dmaven.repo.local=/home/delfad0r/.m2/repository package -f pom.xml"
 TARGET_JAR="./target/undothespire.jar"
 CONFIG_FILE="$MOD_DIR/config.json"
 MOD_UPLOADER="java -jar mod-uploader.jar upload -w $MOD_DIR"

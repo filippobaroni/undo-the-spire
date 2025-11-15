@@ -1,8 +1,12 @@
 package undobutton.patches;
 
+import basemod.ReflectionHacks;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.evacipated.cardcrawl.modthespire.patcher.PatchingException;
 import com.megacrit.cardcrawl.events.AbstractEvent;
+import com.megacrit.cardcrawl.events.exordium.DeadAdventurer;
+import com.megacrit.cardcrawl.events.exordium.Mushrooms;
+import com.megacrit.cardcrawl.helpers.ImageMaster;
 import com.megacrit.cardcrawl.map.MapRoomNode;
 import com.megacrit.cardcrawl.rewards.RewardItem;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
@@ -72,8 +76,14 @@ public class RoomStatePatches {
         }
 
         @SpirePostfixPatch
-        public static MapRoomNode loadRewards(MapRoomNode __result, MapRoomNodeState __instance) {
+        public static MapRoomNode postfix(MapRoomNode __result, MapRoomNodeState __instance) {
             __result.room.rewards = ExtraFields.rewards.get(__instance).stream().map(RoomStatePatches::copyRewardItem).collect(Collectors.toCollection(ArrayList::new));
+            if (__result.room.event instanceof DeadAdventurer) {
+                ReflectionHacks.setPrivate(__result.room.event, DeadAdventurer.class, "adventurerImg", ImageMaster.loadImage("images/npcs/nopants.png"));
+            } else if (__result.room.event instanceof Mushrooms) {
+                ReflectionHacks.setPrivate(__result.room.event, Mushrooms.class, "fgImg", ImageMaster.loadImage("images/events/fgShrooms.png"));
+                ReflectionHacks.setPrivate(__result.room.event, Mushrooms.class, "bgImg", ImageMaster.loadImage("images/events/bgShrooms.png"));
+            }
             return __result;
         }
 

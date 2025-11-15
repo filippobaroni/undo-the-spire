@@ -108,11 +108,6 @@ in the future).
 
 - Make sure that you've selected all the required dependencies for **Undo the Spire** in the ModTheSpire launcher.
 
-**If the game crashes when you undo an action during the Three Mushroom fight or Dead Adventurer fight**
-
-- This is a known bug that affects some users, hopefully a fix is on the way.
-  In the meantime, if you are one of these users, consider not using the undo button in these fights.
-
 **If you don't see undo/redo buttons in combat**
 
 - Make sure you're playing the game with mods (there should be a faint text in the bottom left or top right corner
