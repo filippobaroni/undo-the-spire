@@ -9,11 +9,10 @@ import java.util.ArrayDeque;
 public class UndoButtonController {
     private final ArrayDeque<GameState> pastGameStates = new ArrayDeque<>();
     private final ArrayDeque<GameState> futureGameStates = new ArrayDeque<>();
-    private int nonFailedPastStates = 0;
-    private int nonFailedFutureStates = 0;
     public boolean isThisEndTurnForced = false;
     public boolean isPlayerFlippedHorizontally = false;
-
+    private int nonFailedPastStates = 0;
+    private int nonFailedFutureStates = 0;
 
     public void onStartBattle(AbstractRoom room) {
         clearStates();

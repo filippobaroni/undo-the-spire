@@ -169,6 +169,23 @@ public class UndoButtonMod implements EditStringsSubscriber, PostInitializeSubsc
         return Patcher.annotationDBMap.values().stream().map(db -> db.getAnnotationIndex().getOrDefault(annotationName, Collections.emptySet())).flatMap(Set::stream).collect(Collectors.toList());
     }
 
+    /**
+     * This determines the mod's ID based on information stored by ModTheSpire.
+     */
+    private static void loadModInfo() {
+        Optional<ModInfo> infos = Arrays.stream(Loader.MODINFOS).filter((modInfo) -> {
+            AnnotationDB annotationDB = Patcher.annotationDBMap.get(modInfo.jarURL);
+            if (annotationDB == null) return false;
+            Set<String> initializers = annotationDB.getAnnotationIndex().getOrDefault(SpireInitializer.class.getName(), Collections.emptySet());
+            return initializers.contains(UndoButtonMod.class.getName());
+        }).findFirst();
+        if (infos.isPresent()) {
+            info = infos.get();
+            modID = info.ID;
+        } else {
+            throw new RuntimeException("Failed to determine mod info/ID based on initializer.");
+        }
+    }
 
     @Override
     public void receivePostInitialize() {
@@ -217,6 +234,8 @@ public class UndoButtonMod implements EditStringsSubscriber, PostInitializeSubsc
         }
     }
 
+    /*----------Localization----------*/
+
     @Override
     public void receivePrePotionUse(AbstractPotion potion) {
         if (AbstractDungeon.getCurrMapNode() == null) {
@@ -233,26 +252,6 @@ public class UndoButtonMod implements EditStringsSubscriber, PostInitializeSubsc
             if (m != null) {
                 UndoButtonMod.controller.isPlayerFlippedHorizontally = m.drawX < AbstractDungeon.player.drawX;
             }
-        }
-    }
-
-    /*----------Localization----------*/
-
-    /**
-     * This determines the mod's ID based on information stored by ModTheSpire.
-     */
-    private static void loadModInfo() {
-        Optional<ModInfo> infos = Arrays.stream(Loader.MODINFOS).filter((modInfo) -> {
-            AnnotationDB annotationDB = Patcher.annotationDBMap.get(modInfo.jarURL);
-            if (annotationDB == null) return false;
-            Set<String> initializers = annotationDB.getAnnotationIndex().getOrDefault(SpireInitializer.class.getName(), Collections.emptySet());
-            return initializers.contains(UndoButtonMod.class.getName());
-        }).findFirst();
-        if (infos.isPresent()) {
-            info = infos.get();
-            modID = info.ID;
-        } else {
-            throw new RuntimeException("Failed to determine mod info/ID based on initializer.");
         }
     }
 

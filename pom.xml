@@ -33,8 +33,8 @@
     <!--You'll get a warning regarding these when you package your mod, but don't worry, it's just set up like this for convenience.-->
     <!--Technically these should be changed individually, but this allows you to just set it in one place.-->
     <!--Absolutely a no-go for larger projects, but for a personal mod it's fine.-->
-    <groupId>${modID}</groupId>
-    <artifactId>${modID}</artifactId>
+    <groupId>undothespire</groupId>
+    <artifactId>undothespire</artifactId>
 
     <dependencies>
         <dependency>

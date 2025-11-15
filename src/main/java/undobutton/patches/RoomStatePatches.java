@@ -32,6 +32,10 @@ public class RoomStatePatches {
         }
     }
 
+    public enum ActualRoomType {
+        BOSS, ELITE, MONSTER, EVENT
+    }
+
     @SpirePatch(clz = MapRoomNodeState.class, method = SpirePatch.CLASS)
     public static class ExtraFields {
         public static SpireField<ArrayList<RewardItem>> rewards = new SpireField<>(() -> null);
@@ -67,6 +71,12 @@ public class RoomStatePatches {
             }
         }
 
+        @SpirePostfixPatch
+        public static MapRoomNode loadRewards(MapRoomNode __result, MapRoomNodeState __instance) {
+            __result.room.rewards = ExtraFields.rewards.get(__instance).stream().map(RoomStatePatches::copyRewardItem).collect(Collectors.toCollection(ArrayList::new));
+            return __result;
+        }
+
         public static class Locator extends SpireInsertLocator {
             @Override
             public int[] Locate(CtBehavior ctMethodToPatch) throws CannotCompileException, PatchingException {
@@ -75,15 +85,5 @@ public class RoomStatePatches {
                 return new int[]{line + 1};
             }
         }
-
-        @SpirePostfixPatch
-        public static MapRoomNode loadRewards(MapRoomNode __result, MapRoomNodeState __instance) {
-            __result.room.rewards = ExtraFields.rewards.get(__instance).stream().map(RoomStatePatches::copyRewardItem).collect(Collectors.toCollection(ArrayList::new));
-            return __result;
-        }
-    }
-
-    public enum ActualRoomType {
-        BOSS, ELITE, MONSTER, EVENT
     }
 }

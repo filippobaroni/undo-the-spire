@@ -3,16 +3,29 @@ package undobutton.patches;
 
 import com.evacipated.cardcrawl.modthespire.lib.SpireInstrumentPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
+import com.evacipated.cardcrawl.modthespire.lib.SpirePatch2;
+import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
 import javassist.CannotCompileException;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import savestate.CardState;
+import savestate.PotionState;
 import savestate.SaveStateMod;
 import savestate.monsters.MonsterState;
 import savestate.relics.RelicState;
 
 
 public class StateSaveModPatches {
+    // SaveStateMod has a list of forbidden potions that cannot appear.
+    // This patch removes that restriction.
+    @SpirePatch2(requiredModId = "SaveStateMod", clz = PotionState.class, method = SpirePatch.STATICINITIALIZER)
+    public static class RemoveUnplayablePotionsPatch {
+        @SpirePostfixPatch
+        public static void Postfix() {
+            PotionState.UNPLAYABLE_POTIONS.clear();
+        }
+    }
+
     // There is a bug in MonsterState where a method tried to set the block colour to a float (instead of Color).
     // This patch fixes that.
     @SpirePatch(requiredModId = "SaveStateMod", clz = MonsterState.class, method = "populateSharedFields")

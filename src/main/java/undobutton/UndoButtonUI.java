@@ -22,11 +22,11 @@ import static undobutton.UndoButtonMod.imagePath;
 
 public class UndoButtonUI {
     private static final float ENERGY_X = 198F, ENERGY_HIDE_X = -480F, ENERGY_Y = 190F, ENERGY_Y_OFFSET = 128F, HORIZONTAL_SPACING = 10F, TOOLTIP_OFFSET = 120F;
+    public static boolean isVisibleBelowScreen = false;
+    public static boolean isVisibleAboveScreen = false;
     private Texture undoButtonTexture, undoButtonDisabledTexture, redoButtonTexture, redoButtonDisabledTexture;
     private UndoButton undoButton;
     private RedoButton redoButton;
-    public static boolean isVisibleBelowScreen = false;
-    public static boolean isVisibleAboveScreen = false;
 
     public void initialize() {
         undoButtonTexture = TextureLoader.getTexture(imagePath("buttons/undoButton.png"));
@@ -86,13 +86,13 @@ public class UndoButtonUI {
     }
 
     abstract static class UndoOrRedoButton extends ClickableUIElement {
+        public static final Color
+                BASE_TINT = new Color(1.0F, 1.0F, 1.0F, 0.0F),
+                FAILED_TINT = new Color(1.0F, 0.0F, 0.0F, 0.25F);
         protected float width, height;
         protected TutorialStrings tutorialStrings;
         protected float alpha, targetAlpha;
         protected float target_x;
-        public static final Color
-                BASE_TINT = new Color(1.0F, 1.0F, 1.0F, 0.0F),
-                FAILED_TINT = new Color(1.0F, 0.0F, 0.0F, 0.25F);
         protected float idleAlpha;
         protected Texture enabledTexture, disabledTexture;
         protected boolean isSpireAndShieldFight = false;

@@ -37,16 +37,12 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class GameState {
+    private final static ArrayList<Consumer<PostLoadInfo>> postLoadRunners = new ArrayList<>();
     public static Class<?>[] extraStateTypes;
     public static Class<?>[] extraStateHandlers;
-    private final static ArrayList<Consumer<PostLoadInfo>> postLoadRunners = new ArrayList<>();
     public final SaveState saveState;
     public final Object[] extraState;
     public Action lastAction;
-
-    public static void addPostLoadRunner(Consumer<PostLoadInfo> runner) {
-        postLoadRunners.add(runner);
-    }
 
     public GameState(Action action) {
         lastAction = action;
@@ -141,6 +137,10 @@ public class GameState {
                 ReflectionHacks.setPrivate(rewardScreen, CardRewardScreenState.class, "touchCard", null);
                 break;
         }
+    }
+
+    public static void addPostLoadRunner(Consumer<PostLoadInfo> runner) {
+        postLoadRunners.add(runner);
     }
 
     public void apply() {

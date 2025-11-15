@@ -46,6 +46,10 @@ public class RelicStatsCompatibility {
         }
     }
 
+    private static boolean checkForMod() {
+        return Loader.isModLoaded("RelicStats");
+    }
+
     public enum ExtraActions {
         AOE_DAMAGE_FOLLOWUP_ACTION(AoeDamageFollowupAction.class, new ActionState.ActionFactories(action -> new AoeDamageFollowupActionState((AoeDamageFollowupAction) action))),
         DRAW_FOLLOWUP_ACTION(CardDrawFollowupAction.class),
@@ -170,9 +174,5 @@ public class RelicStatsCompatibility {
         public AbstractGameAction loadAction() {
             return new AoeDamageFollowupAction(statTracker, new PreAoeDamageAction());
         }
-    }
-
-    private static boolean checkForMod() {
-        return Loader.isModLoaded("RelicStats");
     }
 }
