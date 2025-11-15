@@ -12,6 +12,8 @@ public class StatsTracker {
 
     public static void load(StatsState state) {
         CardCrawlGame.goldGained = state.goldGained;
+        GameActionManager.damageReceivedThisCombat = state.damageReceivedThisCombat;
+        GameActionManager.hpLossThisCombat = state.hpLossThisCombat;
     }
 
     public static class StatsState {
