@@ -25,7 +25,6 @@ import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import com.megacrit.cardcrawl.potions.AbstractPotion;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import com.megacrit.cardcrawl.ui.panels.PotionPopUp;
-import javassist.CannotCompileException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.scannotation.AnnotationDB;
@@ -77,8 +76,8 @@ public class UndoButtonMod implements EditStringsSubscriber, PostInitializeSubsc
         // Find all @MakeUndoable classes
         ArrayList<Class<?>> handlers = findAllClassesWithAnnotation(MakeUndoable.class.getName()).stream().map(name -> {
             try {
-                return (Class<?>) Loader.getClassPool().getOrNull(name).toClass();
-            } catch (CannotCompileException e) {
+                return (Class<?>) Class.forName(name);
+            } catch (ClassNotFoundException e) {
                 // This should never happen.
                 throw new RuntimeException(e);
             }
